@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="16dp">
+    <CheckedTextView
+        android:id="@+id/checkedTextView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1.0"
+        android:layout_gravity="center_vertical|start"
+        android:checkMark="?android:attr/textCheckMark"
+        android:checkMarkTint="@color/colorPrimary"
+        android:textSize="42sp"
+        android:checked="false" />
+    <Button
+        android:id="@+id/delete_button"
+        android:text="DEL"
+        android:visibility="gone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="deleteButtonOnClick"/>
+</LinearLayout>
