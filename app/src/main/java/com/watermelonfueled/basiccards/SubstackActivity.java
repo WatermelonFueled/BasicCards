@@ -2,17 +2,19 @@ package com.watermelonfueled.basiccards;
 
 import android.content.Intent;
 import android.database.Cursor;
+import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+import android.widget.CheckBox;
 
 import java.util.ArrayList;
 
-import static com.watermelonfueled.basiccards.CardsContract.*;
+import static com.watermelonfueled.basiccards.CardsContract.StackEntry;
+import static com.watermelonfueled.basiccards.CardsContract.SubstackEntry;
 
 public class SubstackActivity extends AppCompatActivity
         implements SubstackViewAdapter.ListItemClickListener,
@@ -26,6 +28,7 @@ public class SubstackActivity extends AppCompatActivity
     private ArrayList<String> substackNameList;
     private ArrayList<Integer> substackIdList;
     private ArrayList<Boolean> substackSelectedList;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -122,10 +125,13 @@ public class SubstackActivity extends AppCompatActivity
     }
 
     public void startTestOnClick(View button) {
-        Intent intent = new Intent(this, TestActivity.class);
         String[] arr = selectedSubstackIdsArray();
         if (arr.length <= 0) { return; }
+
+        boolean testInverse = ((CheckBox) findViewById(R.id.inverse_checkbox)).isChecked();
+        Intent intent = new Intent(this, TestActivity.class);
         intent.putExtra(TestActivity.SELECTED_SUBSTACKS, arr);
+        intent.putExtra(TestActivity.INVERSE, testInverse);
         startActivity(intent);
     }
 
