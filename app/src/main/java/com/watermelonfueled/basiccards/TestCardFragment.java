@@ -5,7 +5,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.RadioButton;
+import android.widget.Button;
 import android.widget.TextView;
 
 /**
@@ -13,12 +13,18 @@ import android.widget.TextView;
  */
 
 public class TestCardFragment extends Fragment implements View.OnClickListener{
+    private AnswerClickListener answerClickListener;
+    public interface AnswerClickListener {
+        void onAnswerClick(boolean correct);
+    }
+
     private boolean done = false;
     private int correctId, correctPosition;
     private String[] questionAnswers;
 
-    public static TestCardFragment newInstance(int correctPosition, String... questionAnswers) {
+    public static TestCardFragment newInstance(AnswerClickListener listener, int correctPosition, String... questionAnswers) {
         TestCardFragment testCardFragment = new TestCardFragment();
+        testCardFragment.answerClickListener = listener;
         Bundle args = new Bundle();
         args.putInt("correctPosition", correctPosition);
         args.putStringArray("questionAnswers", questionAnswers);
@@ -65,10 +71,10 @@ public class TestCardFragment extends Fragment implements View.OnClickListener{
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.test_card_view, container, false);
-        RadioButton button1 = (RadioButton) view.findViewById(R.id.answer_1);
-        RadioButton button2 = (RadioButton) view.findViewById(R.id.answer_2);
-        RadioButton button3 = (RadioButton) view.findViewById(R.id.answer_3);
-        RadioButton button4 = (RadioButton) view.findViewById(R.id.answer_4);
+        Button button1 = (Button) view.findViewById(R.id.answer_1);
+        Button button2 = (Button) view.findViewById(R.id.answer_2);
+        Button button3 = (Button) view.findViewById(R.id.answer_3);
+        Button button4 = (Button) view.findViewById(R.id.answer_4);
         button1.setOnClickListener(this);
         button2.setOnClickListener(this);
         button3.setOnClickListener(this);
@@ -88,10 +94,10 @@ public class TestCardFragment extends Fragment implements View.OnClickListener{
         done = true;
         if (selectedAnswer.getId() == correctId) {
             selectedAnswer.setBackgroundColor(getResources().getColor(R.color.colorAccent));
-
+            answerClickListener.onAnswerClick(true);
         } else {
             selectedAnswer.setAlpha(0.5f);
-
+            answerClickListener.onAnswerClick(false);
         }
     }
 

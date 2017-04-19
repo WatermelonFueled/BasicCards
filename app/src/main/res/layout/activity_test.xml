@@ -5,10 +5,9 @@
     android:layout_height="match_parent"
     tools:context="com.watermelonfueled.basiccards.TestActivity">
 
-    <android.support.v4.view.ViewPager
+    <com.watermelonfueled.basiccards.NoSwipeViewPager
         android:id="@+id/pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-
-    </android.support.v4.view.ViewPager>
+    </com.watermelonfueled.basiccards.NoSwipeViewPager>
 </LinearLayout>

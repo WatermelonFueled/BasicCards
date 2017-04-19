@@ -1,13 +1,16 @@
 package com.watermelonfueled.basiccards;
 
+import android.app.DialogFragment;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.PagerAdapter;
-import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.view.View;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,12 +22,14 @@ import static com.watermelonfueled.basiccards.CardsContract.CardEntry;
 public class TestActivity extends AppCompatActivity {
 
     public final static String SELECTED_SUBSTACKS = "SelectedSubstacks", TAG = "TESTACTIVITY", INVERSE = "inverse";
-    private ViewPager pager;
+    private final long SWIPE_DELAY = 750;
+    private NoSwipeViewPager pager;
     private ArrayList<String> substackIdsArrayList;
     private ArrayList<ArrayList<Integer>> positions;
     private String[][] cardData;
     private ArrayList<Integer> order;
     private boolean testInverse;
+    private int correctCount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,10 +40,12 @@ public class TestActivity extends AppCompatActivity {
 
         loadCards();
         setView();
+
+        correctCount = 0;
     }
 
     private void setView() {
-        pager = (ViewPager) findViewById(R.id.pager);
+        pager = (NoSwipeViewPager) findViewById(R.id.pager);
         PagerAdapter pagerAdapter = new TestCardPagerAdapter(getSupportFragmentManager());
         pager.setAdapter(pagerAdapter);
     }
@@ -73,7 +80,12 @@ public class TestActivity extends AppCompatActivity {
         cursor.close();
     }
 
-    private class TestCardPagerAdapter extends FragmentStatePagerAdapter {
+    //TODO compare fragmentstatepageradapter vs fragmentpageradapter
+    private class TestCardPagerAdapter extends FragmentStatePagerAdapter
+            implements TestCardFragment.AnswerClickListener {
+
+
+
         public TestCardPagerAdapter(FragmentManager fm) {
             super(fm);
         }
@@ -100,7 +112,21 @@ public class TestActivity extends AppCompatActivity {
                     questionAnswers[i] = cardData[1][substackPositions.get(j)];
                 }
             }
-            return TestCardFragment.newInstance(correctPosition, questionAnswers);
+            return TestCardFragment.newInstance(this, correctPosition, questionAnswers);
+        }
+
+        private final Handler handler = new Handler();
+        private final Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                pager.arrowScroll(View.FOCUS_RIGHT);
+            }
+        };
+
+        public void onAnswerClick(boolean correct) {
+            if (correct) { correctCount++; }
+            Log.i(TAG, "Correct count: "+correctCount);
+            handler.postDelayed(runnable, SWIPE_DELAY);
         }
 
         @Override
@@ -109,12 +135,13 @@ public class TestActivity extends AppCompatActivity {
         }
     }
 
-//    @Override
-//    public void onBackPressed() {
-//        if (pager.getCurrentItem() == 0) {
-//            super.onBackPressed();
-//        } else {
-//            pager.setCurrentItem(pager.getCurrentItem() - 1);
-//        }
-//    }
+    @Override
+    public void onBackPressed() {
+        DialogFragment dialog = new CancelTestDialog();
+        dialog.show(getFragmentManager(), "CancelTestDialog");
+    }
+
+    public void goBack() {
+        super.onBackPressed();
+    }
 }
