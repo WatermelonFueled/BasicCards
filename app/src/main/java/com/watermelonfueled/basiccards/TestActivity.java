@@ -8,6 +8,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -30,6 +31,7 @@ public class TestActivity extends AppCompatActivity {
     private ArrayList<Integer> order;
     private boolean testInverse;
     private int correctCount;
+    TestResultsFragment resultsFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,8 +48,20 @@ public class TestActivity extends AppCompatActivity {
 
     private void setView() {
         pager = (NoSwipeViewPager) findViewById(R.id.pager);
-        PagerAdapter pagerAdapter = new TestCardPagerAdapter(getSupportFragmentManager());
+        PagerAdapter pagerAdapter = new TestCardPagerAdapter(getSupportFragmentManager(), this);
         pager.setAdapter(pagerAdapter);
+        pager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {}
+            @Override
+            public void onPageSelected(int position) {
+                if (position == cardData[0].length) {
+                    resultsFragment.setScore(getScore());
+                }
+            }
+            @Override
+            public void onPageScrollStateChanged(int state) {}
+        });
     }
 
     private void loadCards() {
@@ -84,14 +98,19 @@ public class TestActivity extends AppCompatActivity {
     private class TestCardPagerAdapter extends FragmentStatePagerAdapter
             implements TestCardFragment.AnswerClickListener {
 
+        TestActivity testActivity;
 
-
-        public TestCardPagerAdapter(FragmentManager fm) {
+        public TestCardPagerAdapter(FragmentManager fm, TestActivity testActivity) {
             super(fm);
+            this.testActivity = testActivity;
+            resultsFragment = TestResultsFragment.newInstance(testActivity);
         }
 
         @Override
         public Fragment getItem(int position) {
+            if (position == cardData[0].length) {
+                return resultsFragment;
+            }
             int orderPosition = order.get(position);
             String question = cardData[0][orderPosition];
             String correct = cardData[1][orderPosition];
@@ -131,8 +150,12 @@ public class TestActivity extends AppCompatActivity {
 
         @Override
         public int getCount() {
-            return cardData[0].length;
+            return cardData[0].length + 1;
         }
+    }
+
+    public float getScore() {
+        return 100*correctCount/cardData[0].length;
     }
 
     @Override
@@ -144,4 +167,6 @@ public class TestActivity extends AppCompatActivity {
     public void goBack() {
         super.onBackPressed();
     }
+
+
 }
