@@ -21,15 +21,15 @@ public class TestResultsFragment extends Fragment implements View.OnClickListene
         return fragment;
     }
 
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.test_results, container, false);
         Button exitButton = (Button) view.findViewById(R.id.exit);
+
+
         exitButton.setOnClickListener(this);
         return view;
     }
-
 
     public void onClick(View view) {
         testActivity.goBack();
@@ -38,5 +38,7 @@ public class TestResultsFragment extends Fragment implements View.OnClickListene
     public void setScore(float rawPercent) {
         TextView scoreView = (TextView) getView().findViewById(R.id.score);
         scoreView.setText(Math.round(rawPercent)+"%");
+        ResultsPieChartView pieChart = (ResultsPieChartView) getView().findViewById(R.id.pie);
+        pieChart.setCorrectPercent(rawPercent);
     }
 }

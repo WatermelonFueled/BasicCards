@@ -7,21 +7,26 @@
         android:layout_width="match_parent"
         android:layout_weight="7"
         android:layout_height="0dp">
+        <com.watermelonfueled.basiccards.ResultsPieChartView
+            android:id="@+id/pie"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Results"
             android:layout_alignParentTop="true"
             android:layout_alignParentLeft="true"
-            android:textSize="75sp"/>
-
+            android:textSize="75dp"/>
         <TextView
             android:id="@+id/score"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_alignParentBottom="true"
-            android:textSize="120sp"/>
+            android:textSize="120dp"/>
     </RelativeLayout>
     <Button
         android:id="@+id/exit"
