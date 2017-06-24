@@ -11,18 +11,18 @@ import android.support.v7.app.AlertDialog;
  * Created by dapar on 2017-01-29.
  */
 
-public class DeleteStackDialog extends DialogFragment{
+public class DeleteDialog extends DialogFragment{
 
-    public interface DeleteStackDialogListener {
-        void onDeleteStackDialogPositiveClick(DialogFragment dialog);
+    public interface DeleteDialogListener {
+        void onDeleteDialogPositiveClick(DialogFragment dialog);
     }
-    private DeleteStackDialogListener listener;
-    private String stackName;
+    private DeleteDialogListener listener;
+    private String confirmMessage;
 
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        try { listener = (DeleteStackDialogListener) activity; }
+        try { listener = (DeleteDialogListener) activity; }
         catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
                     + " must implement DeleteStackDialogListener");
@@ -32,11 +32,11 @@ public class DeleteStackDialog extends DialogFragment{
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle("Delete " + stackName + "?")
+        builder.setTitle(confirmMessage)
         .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                listener.onDeleteStackDialogPositiveClick(DeleteStackDialog.this);
+                listener.onDeleteDialogPositiveClick(DeleteDialog.this);
             }
         }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
@@ -47,7 +47,7 @@ public class DeleteStackDialog extends DialogFragment{
         return builder.create();
     }
 
-    public void setStackName(String name) {
-        stackName = name;
+    public void setConfirmMessage(String message) {
+        confirmMessage = message;
     }
 }

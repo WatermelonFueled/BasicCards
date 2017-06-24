@@ -2,6 +2,7 @@ package com.watermelonfueled.basiccards;
 
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
@@ -19,7 +20,7 @@ import static com.watermelonfueled.basiccards.CardsContract.SubstackEntry;
 public class SubstackActivity extends AppCompatActivity
         implements SubstackViewAdapter.ListItemClickListener,
         AddStackDialog.AddStackDialogListener,
-        DeleteStackDialog.DeleteStackDialogListener,
+        DeleteDialog.DeleteDialogListener,
         AddCardDialog.AddCardDialogListener{
 
     private DbHelper dbHelper;
@@ -28,6 +29,7 @@ public class SubstackActivity extends AppCompatActivity
     private ArrayList<String> substackNameList;
     private ArrayList<Integer> substackIdList;
     private ArrayList<Boolean> substackSelectedList;
+    private String toDeleteName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,13 +89,15 @@ public class SubstackActivity extends AppCompatActivity
 
     public void deleteButtonOnClick(View button) {
         toDeleteIndex = (int) button.getTag();
-        DeleteStackDialog dialog = new DeleteStackDialog();
-        dialog.setStackName(substackNameList.get(toDeleteIndex));
+        toDeleteName = substackNameList.get(toDeleteIndex);
+        DeleteDialog dialog = new DeleteDialog();
+        dialog.setConfirmMessage("Are you sure you want to delete: " +
+                toDeleteName + "? All its contents will be deleted.");
         dialog.show(getSupportFragmentManager(), "DeleteSubstackDialog");
     }
 
     @Override
-    public void onDeleteStackDialogPositiveClick(DialogFragment dialog) {
+    public void onDeleteDialogPositiveClick(DialogFragment dialog) {
         dbHelper.deleteSubstack(substackIdList.get(toDeleteIndex));
         updated();
     }
@@ -110,8 +114,8 @@ public class SubstackActivity extends AppCompatActivity
     }
 
     @Override
-    public void onAddCardDialogPositiveClick(DialogFragment dialog, String front, String back) {
-        dbHelper.addCard(front,back,substackIdList.get(addCardToSubstackIndex));
+    public void onAddCardDialogPositiveClick(DialogFragment dialog, String front, String back, Bitmap image) {
+        dbHelper.addCard(front,back,substackIdList.get(addCardToSubstackIndex), image);
         updated();
         addCardToSubstackIndex = 0;
     }

@@ -25,6 +25,7 @@ public final class CardsContract {
         public static final String COLUMN_SUBSTACK = "substack_id";
         public static final String COLUMN_QUESTION = "question";
         public static final String COLUMN_ANSWER = "answer";
+        public static final String COLUMN_IMAGE = "image";
         public static final String COLUMN_TIMESTAMP = "timestamp";
     }
 }

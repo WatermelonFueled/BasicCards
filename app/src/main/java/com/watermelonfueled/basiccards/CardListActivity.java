@@ -2,26 +2,30 @@ package com.watermelonfueled.basiccards;
 
 import android.content.Intent;
 import android.database.Cursor;
-import android.support.v7.app.AppCompatActivity;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.SparseArray;
 import android.view.View;
 
 import java.util.ArrayList;
 
-import static com.watermelonfueled.basiccards.CardsContract.*;
+import static com.watermelonfueled.basiccards.CardsContract.CardEntry;
 
 public class CardListActivity extends AppCompatActivity
         implements CardListViewAdapter.ListItemClickListener,
-        DeleteStackDialog.DeleteStackDialogListener {
+        DeleteDialog.DeleteDialogListener {
 
     private DbHelper dbHelper;
     public final static String SELECTED_SUBSTACKS = "SelectedSubstacks";
     private CardListViewAdapter adapter;
     private ArrayList<String> cardFrontList, cardBackList;
     private ArrayList<Integer> cardIdList;
+    private SparseArray<Bitmap> cardImageList;
     private String[] substackIds;
     private int toDeleteIndex;
 
@@ -44,7 +48,7 @@ public class CardListActivity extends AppCompatActivity
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         rv.setLayoutManager(layoutManager);
         rv.setHasFixedSize(true);
-        adapter = new CardListViewAdapter(this, cardFrontList, cardBackList);
+        adapter = new CardListViewAdapter(this, cardFrontList, cardBackList, cardImageList);
         rv.setAdapter(adapter);
     }
 
@@ -53,10 +57,15 @@ public class CardListActivity extends AppCompatActivity
         cardFrontList = new ArrayList<>(cursor.getCount());
         cardBackList = new ArrayList<>(cursor.getCount());
         cardIdList = new ArrayList<>(cursor.getCount());
+        cardImageList = new SparseArray<>(cursor.getCount());
         while(cursor.moveToNext()){
             cardFrontList.add(cursor.getString(cursor.getColumnIndex(CardEntry.COLUMN_QUESTION)));
             cardBackList.add(cursor.getString(cursor.getColumnIndex(CardEntry.COLUMN_ANSWER)));
             cardIdList.add(cursor.getInt(cursor.getColumnIndex(CardEntry._ID)));
+            byte[] image = cursor.getBlob(cursor.getColumnIndex(CardEntry.COLUMN_IMAGE));
+            if (image != null) {
+                cardImageList.setValueAt(cursor.getPosition(),BitmapFactory.decodeByteArray(image, 0, image.length));
+            }
         }
         cursor.close();
     }
@@ -68,19 +77,20 @@ public class CardListActivity extends AppCompatActivity
 
     public void deleteButtonOnClick(View button) {
         toDeleteIndex = (int) button.getTag();
-        DeleteStackDialog dialog = new DeleteStackDialog();
-        dialog.setStackName(cardFrontList.get(toDeleteIndex) + "/" + cardBackList.get(toDeleteIndex));
+        DeleteDialog dialog = new DeleteDialog();
+        dialog.setConfirmMessage("Delete: " + cardFrontList.get(toDeleteIndex)
+                + "/" + cardBackList.get(toDeleteIndex) + " ?");
         dialog.show(getSupportFragmentManager(), "DeleteCardDialog");
     }
 
     @Override
-    public void onDeleteStackDialogPositiveClick(DialogFragment dialog) {
+    public void onDeleteDialogPositiveClick(DialogFragment dialog) {
         dbHelper.deleteCard(cardIdList.get(toDeleteIndex));
         updated();
     }
 
     private void updated() {
         loadCards();
-        adapter.updated(cardFrontList, cardBackList);
+        adapter.updated(cardFrontList, cardBackList, cardImageList);
     }
 }

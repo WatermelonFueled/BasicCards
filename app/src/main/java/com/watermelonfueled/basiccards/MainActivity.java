@@ -2,23 +2,22 @@ package com.watermelonfueled.basiccards;
 
 import android.content.Intent;
 import android.database.Cursor;
+import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
 import java.util.ArrayList;
 
-import static com.watermelonfueled.basiccards.CardsContract.*;
+import static com.watermelonfueled.basiccards.CardsContract.StackEntry;
 
 public class MainActivity extends AppCompatActivity
         implements  StackViewAdapter.ListItemClickListener,
                     AddStackDialog.AddStackDialogListener,
-                    DeleteStackDialog.DeleteStackDialogListener{
+        DeleteDialog.DeleteDialogListener {
 
     private static final String TAG = "MainActivity";
     private Toast toast;
@@ -27,6 +26,7 @@ public class MainActivity extends AppCompatActivity
     private ArrayList<Integer> stackIdList;
     private StackViewAdapter adapter;
     private int toDeleteIndex;
+    private String toDeleteName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,17 +80,18 @@ public class MainActivity extends AppCompatActivity
 
     public void deleteButtonOnClick(View button) {
         toDeleteIndex = (int) button.getTag();
-        DeleteStackDialog dialog = new DeleteStackDialog();
-        dialog.setStackName(stackNameList.get(toDeleteIndex));
+        toDeleteName = stackNameList.get(toDeleteIndex);
+        DeleteDialog dialog = new DeleteDialog();
+        dialog.setConfirmMessage("Are you sure you want to delete: " +
+                toDeleteName + "? All its contents will be deleted.");
         dialog.show(getSupportFragmentManager(), "DeleteStackDialog");
     }
 
     @Override
-    public void onDeleteStackDialogPositiveClick(DialogFragment dialog) {
+    public void onDeleteDialogPositiveClick(DialogFragment dialog) {
         dbHelper.deleteStack(stackIdList.get(toDeleteIndex));
         updated();
-        String stackName = stackNameList.get(toDeleteIndex);
-        makeToast("Deleted: " + stackName);
+        makeToast("Deleted: " + toDeleteName);
     }
 
     private void updated() {

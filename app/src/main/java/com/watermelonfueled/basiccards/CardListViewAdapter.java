@@ -1,13 +1,13 @@
 package com.watermelonfueled.basiccards;
 
-import android.app.FragmentManager;
+import android.graphics.Bitmap;
 import android.support.v7.widget.RecyclerView;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
 import android.widget.Button;
-import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.ViewFlipper;
 
@@ -23,12 +23,14 @@ public class CardListViewAdapter extends RecyclerView.Adapter<CardListViewAdapte
     }
 
     private ArrayList<String> cardFrontList, cardBackList;
+    private SparseArray<Bitmap> cardImageList;
 
     public CardListViewAdapter(ListItemClickListener listener, ArrayList<String> cardFrontList,
-                               ArrayList<String> cardBackList) {
+                               ArrayList<String> cardBackList, SparseArray<Bitmap> cardImageList) {
         this.listener = listener;
         this.cardFrontList = cardFrontList;
         this.cardBackList = cardBackList;
+        this.cardImageList = cardImageList;
     }
 
     @Override
@@ -42,6 +44,11 @@ public class CardListViewAdapter extends RecyclerView.Adapter<CardListViewAdapte
     public void onBindViewHolder(CardListViewHolder holder, int position){
         holder.front.setText(cardFrontList.get(position));
         holder.back.setText(cardBackList.get(position));
+        Bitmap image = cardImageList.valueAt(position);
+        if (image != null) {
+            holder.image.setImageBitmap(image);
+        }
+
     }
 
     @Override
@@ -52,6 +59,7 @@ public class CardListViewAdapter extends RecyclerView.Adapter<CardListViewAdapte
                         View.OnLongClickListener,
                         View.OnFocusChangeListener {
         TextView front, back;
+        ImageView image;
         ViewFlipper flipper;
         boolean frontShowing;
         Button deleteButton;
@@ -61,6 +69,7 @@ public class CardListViewAdapter extends RecyclerView.Adapter<CardListViewAdapte
             frontShowing = true;
             front = (TextView) itemView.findViewById(R.id.text_front);
             back = (TextView) itemView.findViewById(R.id.text_back);
+            image = (ImageView) itemView.findViewById(R.id.image);
             flipper = (ViewFlipper) itemView.findViewById(R.id.view_flipper);
             deleteButton = (Button) itemView.findViewById(R.id.delete_button);
             itemView.setOnClickListener(this);
@@ -74,7 +83,6 @@ public class CardListViewAdapter extends RecyclerView.Adapter<CardListViewAdapte
 //            listener.onListItemClick(getAdapterPosition());
             view.setFocusableInTouchMode(true);
             view.requestFocus();
-            view.setFocusableInTouchMode(false);
             deleteButton.setVisibility(View.GONE);
             if (frontShowing) {
 
@@ -84,6 +92,7 @@ public class CardListViewAdapter extends RecyclerView.Adapter<CardListViewAdapte
             } else {
                 flipper.showPrevious();
             }
+            view.clearFocus();
         }
 
         @Override
@@ -106,9 +115,11 @@ public class CardListViewAdapter extends RecyclerView.Adapter<CardListViewAdapte
         }
     }
 
-    public void updated(ArrayList<String> updatedFrontList, ArrayList<String> updatedBackList){
+    public void updated(ArrayList<String> updatedFrontList, ArrayList<String> updatedBackList,
+                        SparseArray<Bitmap> updatedImageList){
         cardFrontList = updatedFrontList;
         cardBackList = updatedBackList;
+        cardImageList = updatedImageList;
         this.notifyDataSetChanged();
     }
 

@@ -5,9 +5,13 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
+import android.graphics.Bitmap;
 
-import com.watermelonfueled.basiccards.CardsContract.*;
+import com.watermelonfueled.basiccards.CardsContract.CardEntry;
+import com.watermelonfueled.basiccards.CardsContract.StackEntry;
+import com.watermelonfueled.basiccards.CardsContract.SubstackEntry;
+
+import java.io.ByteArrayOutputStream;
 
 /**
  * Created by dapar on 2017-01-15.
@@ -18,7 +22,7 @@ public class DbHelper extends SQLiteOpenHelper {
     private static DbHelper instance;
 
     private static final String DATABASE_NAME = "cards.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
 
     private static SQLiteDatabase db;
 
@@ -66,11 +70,20 @@ public class DbHelper extends SQLiteOpenHelper {
     }
 
     @Override
-    public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int j) {
-        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + CardEntry.TABLE_NAME);
-        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + SubstackEntry.TABLE_NAME);
-        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + StackEntry.TABLE_NAME);
-        onCreate(sqLiteDatabase);
+    public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
+        switch (oldVersion) {
+            case 1:
+                sqLiteDatabase.execSQL(
+                    "ALTER TABLE " + CardEntry.TABLE_NAME + " ADD COLUMN " +
+                            CardEntry.COLUMN_IMAGE + " BLOB;"
+                );
+            case 2:
+
+        }
+//        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + CardEntry.TABLE_NAME);
+//        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + SubstackEntry.TABLE_NAME);
+//        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + StackEntry.TABLE_NAME);
+//        onCreate(sqLiteDatabase);
     }
 
     public Cursor loadStackTable() {
@@ -112,6 +125,7 @@ public class DbHelper extends SQLiteOpenHelper {
                 CardEntry._ID,
                 CardEntry.COLUMN_QUESTION,
                 CardEntry.COLUMN_ANSWER,
+                CardEntry.COLUMN_IMAGE,
                 CardEntry.COLUMN_SUBSTACK
         };
         StringBuilder builder = new StringBuilder();
@@ -143,11 +157,16 @@ public class DbHelper extends SQLiteOpenHelper {
         db.insert(SubstackEntry.TABLE_NAME, null, cv);
     }
 
-    public void addCard(String question, String answer, int substackId) {
+    public void addCard(String question, String answer, int substackId, Bitmap image) {
         ContentValues cv = new ContentValues();
         cv.put(CardEntry.COLUMN_QUESTION, question);
         cv.put(CardEntry.COLUMN_ANSWER, answer);
         cv.put(CardEntry.COLUMN_SUBSTACK, substackId);
+        if (image != null) {
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            image.compress(Bitmap.CompressFormat.PNG, 0, stream);
+            cv.put(CardEntry.COLUMN_IMAGE, stream.toByteArray());
+        }
         db.insert(CardEntry.TABLE_NAME, null, cv);
     }
 
