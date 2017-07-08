@@ -1,33 +1,51 @@
 package com.watermelonfueled.basiccards;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Spinner;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+
 
 /**
  * Created by dapar on 2017-01-17.
  */
 
 public class AddCardDialog extends DialogFragment implements AdapterView.OnItemSelectedListener{
+    private final String TAG = "AddCardDialog";
+
     private Bitmap image;
+    private Uri imageUri;
+    private String imagePath;
+    private File imageFile, oldFile;
+    private ImageView thumbnailView;
+    private boolean fileExists = false, photoExists = false;
 
 
     @Override
@@ -41,7 +59,7 @@ public class AddCardDialog extends DialogFragment implements AdapterView.OnItemS
     }
 
     public interface AddCardDialogListener{
-        void onAddCardDialogPositiveClick(DialogFragment dialog, String front, String back, Bitmap image);
+        void onAddCardDialogPositiveClick(DialogFragment dialog, String front, String back, boolean photoExists, Uri imageUri, String imagePath);
         void onAddCardDialogSelectSubstack(int position);
     }
 
@@ -58,7 +76,7 @@ public class AddCardDialog extends DialogFragment implements AdapterView.OnItemS
         }
     }
 
-    static final int PICK_IMAGE = 1;
+
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -76,20 +94,30 @@ public class AddCardDialog extends DialogFragment implements AdapterView.OnItemS
         addImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent();
-                intent.setType("image/*");
-                intent.setAction(Intent.ACTION_GET_CONTENT);
-                startActivityForResult(Intent.createChooser(intent, "Select Image"), PICK_IMAGE);
+                pickGalleryImage();
             }
         });
 
+        Button takePhotoButton = (Button) dialogView.findViewById(R.id.takePhotoButton);
+        takePhotoButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //check camera feature
+                if (getContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
+                    int permissionCheck = ContextCompat.checkSelfPermission(getContext(), Manifest.permission.CAMERA);
+                    //check camera permission
+                    if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+                        ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION);
+                    } else {
+                        takePhoto();
+                    }
+                }//TODO (else) if no camera feature ?
+            }
+        });
+
+        thumbnailView = (ImageView) dialogView.findViewById(R.id.thumbnail);
+
         builder.setTitle("Add Card")
-//                .setSingleChoiceItems(substackNames, 0, new DialogInterface.OnClickListener() {
-//                    @Override
-//                    public void onClick(DialogInterface dialog, int which) {
-//                        listener.onAddCardDialogSelectSubstack(which);
-//                    }
-//                })
                 .setView(dialogView)
                 .setPositiveButton("Add", new DialogInterface.OnClickListener(){
                     @Override
@@ -97,34 +125,106 @@ public class AddCardDialog extends DialogFragment implements AdapterView.OnItemS
                         EditText frontInput = (EditText) dialogView.findViewById(R.id.inputQuestion);
                         EditText backInput = (EditText) dialogView.findViewById(R.id.inputAnswer);
                         listener.onAddCardDialogPositiveClick(AddCardDialog.this,
-                                frontInput.getText().toString(), backInput.getText().toString(), image);
+                                frontInput.getText().toString(), backInput.getText().toString(),
+                                photoExists, imageUri, imagePath);
                     }
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
-                        //cancel
+                        oldFile = imageFile;
+                        checkAndDeleteCapturedPhoto();
                     }
                 });
         return builder.create();
     }
 
+    static final int PICK_IMAGE = 1, TAKE_PHOTO = 2, REQUEST_CAMERA_PERMISSION = 3;
+
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode,resultCode,data);
+        if (resultCode != Activity.RESULT_OK || data == null || data.getData() == null) {
+            // not okay result code
 
-        if (requestCode == PICK_IMAGE && resultCode == Activity.RESULT_OK) {
+            return;
+        }
+        photoExists = true;
+
+        switch (requestCode) {
+            case PICK_IMAGE:
+                try {
+                    InputStream inputStream = getContext().getContentResolver().openInputStream(data.getData());
+                    //thumbnail options
+                    BitmapFactory.Options opts = new BitmapFactory.Options();
+                    opts.inSampleSize = 2; //factor for smaller size (powers of 2)
+                    image = BitmapFactory.decodeStream(inputStream, null, opts);
+                    inputStream.close(); //do i need it?
+                    imageUri = data.getData();
+                    imagePath = null;
+                    checkAndDeleteCapturedPhoto();
+                    fileExists = false;
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                break;
+            case TAKE_PHOTO:
+                checkAndDeleteCapturedPhoto(); // delete previous captured photo
+                fileExists = true;
+                imageUri = null;
+                imagePath = imageFile.getAbsolutePath();
+                image = ImageHelper.loadImage(imagePath,thumbnailView.getWidth(),thumbnailView.getHeight());
+                break;
+
+        }
+
+        thumbnailView.setImageBitmap(image);
+
+    }
+
+    private void checkAndDeleteCapturedPhoto() {
+        if (fileExists) {
+            Log.d(TAG, "Deleting: " + oldFile.toString());
+            oldFile.delete();
+        }
+    }
+
+    private void pickGalleryImage(){
+        oldFile = imageFile;
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intent, "Select Image"), PICK_IMAGE);
+    }
+
+    private void takePhoto() {
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (intent.resolveActivity(getContext().getPackageManager()) != null) {
             try {
-                InputStream inputStream = getContext().getContentResolver().openInputStream(data.getData());
-                image = BitmapFactory.decodeStream(inputStream);
-                inputStream.close(); //do i need it?
-            } catch (FileNotFoundException e) {
+                oldFile = imageFile;
+                imageFile = DbHelper.createImageFile();
+                Uri uri = FileProvider.getUriForFile(getContext(), "com.watermelonfueled.basiccards.fileprovider", imageFile);
+                intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+                startActivityForResult(intent, TAKE_PHOTO);
+            } catch (SecurityException e) {
                 e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+    }
 
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_CAMERA_PERMISSION:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                    takePhoto();
+                }
         }
     }
 

@@ -2,13 +2,12 @@ package com.watermelonfueled.basiccards;
 
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
 
@@ -20,12 +19,14 @@ public class CardListActivity extends AppCompatActivity
         implements CardListViewAdapter.ListItemClickListener,
         DeleteDialog.DeleteDialogListener {
 
+    private final String TAG = "CardListActivity";
+
     private DbHelper dbHelper;
     public final static String SELECTED_SUBSTACKS = "SelectedSubstacks";
     private CardListViewAdapter adapter;
     private ArrayList<String> cardFrontList, cardBackList;
     private ArrayList<Integer> cardIdList;
-    private SparseArray<Bitmap> cardImageList;
+    private SparseArray<String> cardImageList;
     private String[] substackIds;
     private int toDeleteIndex;
 
@@ -41,6 +42,8 @@ public class CardListActivity extends AppCompatActivity
         loadCards();
 
         setView();
+
+
     }
 
     private void setView() {
@@ -48,7 +51,7 @@ public class CardListActivity extends AppCompatActivity
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         rv.setLayoutManager(layoutManager);
         rv.setHasFixedSize(true);
-        adapter = new CardListViewAdapter(this, cardFrontList, cardBackList, cardImageList);
+        adapter = new CardListViewAdapter(this, cardFrontList, cardBackList, cardImageList, this);
         rv.setAdapter(adapter);
     }
 
@@ -59,13 +62,17 @@ public class CardListActivity extends AppCompatActivity
         cardIdList = new ArrayList<>(cursor.getCount());
         cardImageList = new SparseArray<>(cursor.getCount());
         while(cursor.moveToNext()){
+            Log.d(TAG, "card +1");
             cardFrontList.add(cursor.getString(cursor.getColumnIndex(CardEntry.COLUMN_QUESTION)));
             cardBackList.add(cursor.getString(cursor.getColumnIndex(CardEntry.COLUMN_ANSWER)));
             cardIdList.add(cursor.getInt(cursor.getColumnIndex(CardEntry._ID)));
-            byte[] image = cursor.getBlob(cursor.getColumnIndex(CardEntry.COLUMN_IMAGE));
-            if (image != null) {
-                cardImageList.setValueAt(cursor.getPosition(),BitmapFactory.decodeByteArray(image, 0, image.length));
-            }
+
+            cardImageList.setValueAt(cursor.getPosition(),cursor.getString(cursor.getColumnIndex(CardEntry.COLUMN_IMAGE)));
+//            String imagePath = cursor.getString(cursor.getColumnIndex(CardEntry.COLUMN_IMAGE));
+//            if (imagePath != null) {
+//                Log.d(TAG, "image path: "+imagePath);
+//                cardImageList.setValueAt(cursor.getPosition(),BitmapFactory.decodeFile(imagePath);
+//            }
         }
         cursor.close();
     }

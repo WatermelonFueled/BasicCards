@@ -1,7 +1,9 @@
 package com.watermelonfueled.basiccards;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,26 +19,37 @@ import java.util.ArrayList;
  * Created by dapar on 2017-02-04.
  */
 public class CardListViewAdapter extends RecyclerView.Adapter<CardListViewAdapter.CardListViewHolder>{
+    private final String TAG = "CardListViewAdapter";
+
     final private ListItemClickListener listener;
     public interface ListItemClickListener {
         void onListItemClick(int clickedItemIndex);
     }
 
     private ArrayList<String> cardFrontList, cardBackList;
-    private SparseArray<Bitmap> cardImageList;
+    private SparseArray<String> cardImageList;
+    private int targetW,targetH;
+    private Context context;
 
     public CardListViewAdapter(ListItemClickListener listener, ArrayList<String> cardFrontList,
-                               ArrayList<String> cardBackList, SparseArray<Bitmap> cardImageList) {
+                               ArrayList<String> cardBackList, SparseArray<String> cardImageList, Context context) {
         this.listener = listener;
         this.cardFrontList = cardFrontList;
         this.cardBackList = cardBackList;
         this.cardImageList = cardImageList;
+        this.context = context;
     }
 
     @Override
     public CardListViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
         View view = LayoutInflater.from(viewGroup.getContext()).inflate(
                 R.layout.card_view, viewGroup, false );
+        view.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+  //      targetW = view.getMeasuredWidth();
+//        targetH = view.getMeasuredHeight();
+        targetW = ImageHelper.getScreenWidthPx(context);
+        targetH = ImageHelper.getPixelsFromDp(context,200);
+        Log.d(TAG, "target dimen WxH: " + targetW + " x " + targetH);
         return new CardListViewHolder(view);
     }
 
@@ -44,8 +57,9 @@ public class CardListViewAdapter extends RecyclerView.Adapter<CardListViewAdapte
     public void onBindViewHolder(CardListViewHolder holder, int position){
         holder.front.setText(cardFrontList.get(position));
         holder.back.setText(cardBackList.get(position));
-        Bitmap image = cardImageList.valueAt(position);
-        if (image != null) {
+        String path = cardImageList.valueAt(position);
+        if (path != null && !path.equalsIgnoreCase("")) {
+            Bitmap image = ImageHelper.loadImage(path, targetW, targetH);
             holder.image.setImageBitmap(image);
         }
 
@@ -116,7 +130,7 @@ public class CardListViewAdapter extends RecyclerView.Adapter<CardListViewAdapte
     }
 
     public void updated(ArrayList<String> updatedFrontList, ArrayList<String> updatedBackList,
-                        SparseArray<Bitmap> updatedImageList){
+                        SparseArray<String> updatedImageList){
         cardFrontList = updatedFrontList;
         cardBackList = updatedBackList;
         cardImageList = updatedImageList;

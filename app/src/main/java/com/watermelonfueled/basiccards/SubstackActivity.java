@@ -2,8 +2,9 @@ package com.watermelonfueled.basiccards;
 
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -12,6 +13,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import static com.watermelonfueled.basiccards.CardsContract.StackEntry;
@@ -46,6 +49,11 @@ public class SubstackActivity extends AppCompatActivity
         loadSubstackList();
 
         setView();
+
+        //For camera write to file
+        //Allowing Strict mode policy for Nougat support
+        StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+        StrictMode.setVmPolicy(builder.build());
     }
 
     private void setView() {
@@ -114,11 +122,27 @@ public class SubstackActivity extends AppCompatActivity
     }
 
     @Override
-    public void onAddCardDialogPositiveClick(DialogFragment dialog, String front, String back, Bitmap image) {
-        dbHelper.addCard(front,back,substackIdList.get(addCardToSubstackIndex), image);
+    public void onAddCardDialogPositiveClick(DialogFragment dialog, String front, String back,
+                                             boolean fileExists, Uri imageUri, String imagePath) {
+        if (fileExists) {
+            if (imageUri == null) {
+                dbHelper.addCard(front, back, substackIdList.get(addCardToSubstackIndex), imagePath);
+            } else {
+                try {
+                    dbHelper.addCard(front, back, substackIdList.get(addCardToSubstackIndex),
+                            dbHelper.storeImage(imageUri));
+                } catch (FileNotFoundException e) {
+                } catch (IOException e) {
+                }
+            }
+        } else {
+            dbHelper.addCard(front, back, substackIdList.get(addCardToSubstackIndex), "");
+        }
         updated();
         addCardToSubstackIndex = 0;
     }
+
+
 
     public void showCardListOnClick(View button) {
         Intent intent = new Intent(this, CardListActivity.class);

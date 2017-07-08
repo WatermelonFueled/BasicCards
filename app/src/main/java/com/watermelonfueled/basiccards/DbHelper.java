@@ -5,24 +5,35 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.graphics.Bitmap;
+import android.net.Uri;
+import android.os.Environment;
+import android.util.Log;
 
 import com.watermelonfueled.basiccards.CardsContract.CardEntry;
 import com.watermelonfueled.basiccards.CardsContract.StackEntry;
 import com.watermelonfueled.basiccards.CardsContract.SubstackEntry;
 
-import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * Created by dapar on 2017-01-15.
  */
 
 public class DbHelper extends SQLiteOpenHelper {
+    private static final String TAG = "DbHelper";
 
     private static DbHelper instance;
+    private static Context con;
 
     private static final String DATABASE_NAME = "cards.db";
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 1;
 
     private static SQLiteDatabase db;
 
@@ -31,6 +42,7 @@ public class DbHelper extends SQLiteOpenHelper {
             instance = new DbHelper(context.getApplicationContext());
         }
         db = instance.getWritableDatabase();
+        con = context;
         return instance;
     }
 
@@ -57,8 +69,9 @@ public class DbHelper extends SQLiteOpenHelper {
                 CardEntry.TABLE_NAME + " (" +
                 CardEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
                 CardEntry.COLUMN_SUBSTACK + " INTEGER NOT NULL, " +
-                CardEntry.COLUMN_QUESTION + " TEXT NOT NULL, " +
-                CardEntry.COLUMN_ANSWER + " TEXT NOT NULL, " +
+                CardEntry.COLUMN_QUESTION + " TEXT, " +
+                CardEntry.COLUMN_ANSWER + " TEXT, " +
+                CardEntry.COLUMN_IMAGE + " TEXT, " +
                 CardEntry.COLUMN_TIMESTAMP + " TIMESTAMP DEFAULT CURRENT_TIMESTAMP, " +
                 " FOREIGN KEY(" + CardEntry.COLUMN_SUBSTACK + ") REFERENCES " +
                 SubstackEntry.TABLE_NAME + "(_id)" +
@@ -71,15 +84,12 @@ public class DbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
-        switch (oldVersion) {
-            case 1:
-                sqLiteDatabase.execSQL(
-                    "ALTER TABLE " + CardEntry.TABLE_NAME + " ADD COLUMN " +
-                            CardEntry.COLUMN_IMAGE + " BLOB;"
-                );
-            case 2:
-
-        }
+//        switch (oldVersion) {
+//            case 1:
+//
+//            case 2:
+//
+//        }
 //        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + CardEntry.TABLE_NAME);
 //        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + SubstackEntry.TABLE_NAME);
 //        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + StackEntry.TABLE_NAME);
@@ -157,17 +167,57 @@ public class DbHelper extends SQLiteOpenHelper {
         db.insert(SubstackEntry.TABLE_NAME, null, cv);
     }
 
-    public void addCard(String question, String answer, int substackId, Bitmap image) {
+    public void addCard(String question, String answer, int substackId, Uri imageUri) {
         ContentValues cv = new ContentValues();
         cv.put(CardEntry.COLUMN_QUESTION, question);
         cv.put(CardEntry.COLUMN_ANSWER, answer);
         cv.put(CardEntry.COLUMN_SUBSTACK, substackId);
-        if (image != null) {
-            ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            image.compress(Bitmap.CompressFormat.PNG, 0, stream);
-            cv.put(CardEntry.COLUMN_IMAGE, stream.toByteArray());
+        try {
+            String imagePath = storeImage(imageUri);
+            cv.put(CardEntry.COLUMN_IMAGE, imagePath);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         db.insert(CardEntry.TABLE_NAME, null, cv);
+    }
+
+    public void addCard(String question, String answer, int substackId, String imagePath) {
+        ContentValues cv = new ContentValues();
+        cv.put(CardEntry.COLUMN_QUESTION, question);
+        cv.put(CardEntry.COLUMN_ANSWER, answer);
+        cv.put(CardEntry.COLUMN_SUBSTACK, substackId);
+
+        cv.put(CardEntry.COLUMN_IMAGE, imagePath);
+
+        db.insert(CardEntry.TABLE_NAME, null, cv);
+    }
+
+    public String storeImage(Uri uri) throws FileNotFoundException, IOException{
+        InputStream inputStream = con.getContentResolver().openInputStream(uri);
+        File imageFile = createImageFile();
+        OutputStream outputStream = new FileOutputStream(imageFile);
+
+        byte[] buffer = new byte[1024];
+        int length;
+        while((length=inputStream.read(buffer))>0) {
+            outputStream.write(buffer,0,length);
+        }
+        outputStream.close();
+        inputStream.close();
+
+        String imagePath = imageFile.getAbsolutePath();
+        Log.d(TAG, "Created image file. imagePath:" + imagePath.toString());
+        return imagePath;
+    }
+
+    public static File createImageFile() throws IOException {
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String fileName = "Card_" + timeStamp + "_";
+        File storageDir = con.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File imageFile = File.createTempFile(fileName,".jpg",storageDir);
+        return imageFile;
     }
 
     public void deleteStack(int id) {
@@ -187,7 +237,17 @@ public class DbHelper extends SQLiteOpenHelper {
     }
 
     public void deleteCard(int id) {
-        db.delete(CardEntry.TABLE_NAME, CardEntry._ID + "=" + id, null);
+        Cursor cursor = db.rawQuery("SELECT " + CardEntry.COLUMN_IMAGE + " FROM "
+                + CardEntry.TABLE_NAME + " WHERE " + CardEntry._ID + "=?", new String[] {id+""});
+        if(cursor.moveToNext()){
+            File file = new File(cursor.getString(cursor.getColumnIndex(CardEntry.COLUMN_IMAGE)));
+            Log.d(TAG, "Deleting: " + file.toString());
+            if (file.delete()) {
+                db.delete(CardEntry.TABLE_NAME, CardEntry._ID + "=" + id, null);
+            } else {
+                //failed to delete file
+                //TODO decide whether to still delete row
+            }
+        }
     }
-
 }

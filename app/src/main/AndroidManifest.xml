@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.watermelonfueled.basiccards">
 
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -17,7 +20,20 @@
         </activity>
         <activity android:name=".SubstackActivity" />
         <activity android:name=".CardListActivity" />
-        <activity android:name=".TestActivity"></activity>
+        <activity android:name=".TestActivity"/>
+        <provider
+            android:authorities="com.watermelonfueled.basiccards.fileprovider"
+            android:name="android.support.v4.content.FileProvider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/provider_paths"></meta-data>
+        </provider>
+
     </application>
+
+    <uses-feature android:name="android.hardware.camera"
+        android:required="false"/>
 
 </manifest>
