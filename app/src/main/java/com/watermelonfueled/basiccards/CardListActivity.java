@@ -100,4 +100,5 @@ public class CardListActivity extends AppCompatActivity
         loadCards();
         adapter.updated(cardFrontList, cardBackList, cardImageList);
     }
+
 }

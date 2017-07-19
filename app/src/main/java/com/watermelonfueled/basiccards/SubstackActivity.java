@@ -1,7 +1,9 @@
 package com.watermelonfueled.basiccards;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.StrictMode;
@@ -15,6 +17,7 @@ import android.widget.CheckBox;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 
 import static com.watermelonfueled.basiccards.CardsContract.StackEntry;
@@ -26,6 +29,8 @@ public class SubstackActivity extends AppCompatActivity
         DeleteDialog.DeleteDialogListener,
         AddCardDialog.AddCardDialogListener{
 
+    private final String TAG = "SubstackActivity";
+
     private DbHelper dbHelper;
     private int stackId, toDeleteIndex, addCardToSubstackIndex = 0 ;
     private SubstackViewAdapter adapter;
@@ -34,16 +39,27 @@ public class SubstackActivity extends AppCompatActivity
     private ArrayList<Boolean> substackSelectedList;
     private String toDeleteName;
 
+    private final String    STACK_ID_KEY = "stackidkey",
+                            ADD_CARD_SUBSTACK_INDEX_KEY = "addcardsubstackindexkey";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_substack);
 
-        Intent intent = getIntent();
-        stackId = intent.getIntExtra(StackEntry._ID, 0);
+        if (savedInstanceState != null) {
+            stackId = savedInstanceState.getInt(STACK_ID_KEY);
+            addCardToSubstackIndex = savedInstanceState.getInt(ADD_CARD_SUBSTACK_INDEX_KEY, 0);
+            if (savedInstanceState.containsKey("addCardDialogBundle")) {
+                addCardDialogBundle = savedInstanceState.getBundle("addCardDialogBundle");
+            }
+        } else {
+            Intent intent = getIntent();
+            stackId = intent.getIntExtra(StackEntry._ID, 0);
 
-        //TODO set actionbar title to stack name
-        String stackName = intent.getStringExtra(StackEntry.COLUMN_NAME);
+            //TODO set actionbar title to stack name
+            String stackName = intent.getStringExtra(StackEntry.COLUMN_NAME);
+        }
 
         dbHelper = DbHelper.getInstance(this);
         loadSubstackList();
@@ -54,6 +70,37 @@ public class SubstackActivity extends AppCompatActivity
         //Allowing Strict mode policy for Nougat support
         StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
         StrictMode.setVmPolicy(builder.build());
+    }
+
+    @Override
+    protected void onResume() {
+        if (addCardDialog != null) {
+            addCardDialog.show(getSupportFragmentManager(), "AddCardDialog");
+        }
+        super.onResume();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState){
+        outState.putInt(STACK_ID_KEY, stackId);
+        outState.putInt(ADD_CARD_SUBSTACK_INDEX_KEY, addCardToSubstackIndex);
+        if (addCardDialogBundle != null) {
+            outState.putBundle("addCardDialogBundle", addCardDialogBundle);
+        }
+
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onRestoreInstanceState(Bundle savedInstanceState) {
+        if (savedInstanceState != null) {
+            stackId = savedInstanceState.getInt(STACK_ID_KEY);
+            addCardToSubstackIndex = savedInstanceState.getInt(ADD_CARD_SUBSTACK_INDEX_KEY, 0);
+            if(savedInstanceState.containsKey("addCardDialogBundle")) {
+                addCardDialogBundle = savedInstanceState.getBundle("addCardDialogBundle");
+            }
+        }
+        super.onRestoreInstanceState(savedInstanceState);
     }
 
     private void setView() {
@@ -110,10 +157,14 @@ public class SubstackActivity extends AppCompatActivity
         updated();
     }
 
+
+    private AddCardDialog addCardDialog;
+    private Bundle addCardDialogBundle;
+
     public void addCardOnClick(View button) {
-        AddCardDialog dialog = new AddCardDialog();
-        dialog.setSubstackNames(substackNameList);
-        dialog.show(getSupportFragmentManager(), "AddCardDialog");
+        addCardDialog = new AddCardDialog();
+        addCardDialog.setSubstackNames(substackNameList);
+        addCardDialog.show(getSupportFragmentManager(), "AddCardDialog");
     }
 
     @Override
@@ -123,8 +174,8 @@ public class SubstackActivity extends AppCompatActivity
 
     @Override
     public void onAddCardDialogPositiveClick(DialogFragment dialog, String front, String back,
-                                             boolean fileExists, Uri imageUri, String imagePath) {
-        if (fileExists) {
+                                             boolean photoExists, Uri imageUri, String imagePath) {
+        if (photoExists) {
             if (imageUri == null) {
                 dbHelper.addCard(front, back, substackIdList.get(addCardToSubstackIndex), imagePath);
             } else {
@@ -140,8 +191,64 @@ public class SubstackActivity extends AppCompatActivity
         }
         updated();
         addCardToSubstackIndex = 0;
+        addCardDialog.dismiss();
+        addCardDialog = null;
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.d(TAG, "onActivityResult called - requestCode: " + requestCode+ " resultCode: " + resultCode);
+        super.onActivityResult(requestCode,resultCode,data);
+        addCardDialog = new AddCardDialog();
+        addCardDialog.unbundleState(addCardDialogBundle);
+//        if (resultCode != Activity.RESULT_OK || data == null || data.getData() == null) {
+        if (resultCode != Activity.RESULT_OK) {
+            // not okay result code
+            if (addCardDialog.oldPath != null) {
+                addCardDialog.imagePath = addCardDialog.oldPath;
+            }
+            return;
+        }
+
+        addCardDialog.photoExists = true;
+
+        switch (requestCode) {
+            case AddCardDialog.PICK_IMAGE:
+                try {
+                    InputStream inputStream = this.getContentResolver().openInputStream(data.getData());
+                    //thumbnail options
+                    BitmapFactory.Options opts = new BitmapFactory.Options();
+                    opts.inSampleSize = 4; //factor for smaller size (powers of 2)
+                    addCardDialog.image = BitmapFactory.decodeStream(inputStream, null, opts);
+                    inputStream.close(); //do i need it?
+                    addCardDialog.imageUri = data.getData();
+                    addCardDialog.imagePath = null;
+                    addCardDialog.oldPath = null;
+                    addCardDialog.checkAndDeleteCapturedPhoto();
+                    addCardDialog.fileExists = false;
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                break;
+            case AddCardDialog.TAKE_PHOTO:
+                addCardDialog.checkAndDeleteCapturedPhoto(); // delete previous captured photo
+                addCardDialog.fileExists = true;
+                addCardDialog.imageUri = null;
+                //addCardDialog.image = ImageHelper.loadImage(addCardDialog.imagePath,addCardDialog.thumbnailView.getWidth(),addCardDialog.thumbnailView.getHeight());
+                break;
+        }
+        Log.d(TAG, "AddCardDialog Booleans - photoexists " + addCardDialog.photoExists+ ", fileexists "+addCardDialog.fileExists);
+        //addCardDialog.thumbnailView.setImageBitmap(addCardDialog.image);
+    }
+
+    public void setAddCardDialogBundle(Bundle bundle) { addCardDialogBundle = bundle; }
+    public void startAddCardDialogIntent(Intent intent, int request) {
+        addCardDialog.dismiss();
+        addCardDialog = null;
+        startActivityForResult(intent, request);
+    }
 
 
     public void showCardListOnClick(View button) {

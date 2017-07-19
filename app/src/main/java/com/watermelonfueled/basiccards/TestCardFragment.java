@@ -6,7 +6,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.ViewFlipper;
 
 /**
  * Created by dapar on 2017-03-06.
@@ -21,13 +23,16 @@ public class TestCardFragment extends Fragment implements View.OnClickListener{
     private boolean done = false;
     private int correctId, correctPosition;
     private String[] questionAnswers;
+    private String imagePath;
+    private ViewFlipper flipper;
 
-    public static TestCardFragment newInstance(AnswerClickListener listener, int correctPosition, String... questionAnswers) {
+    public static TestCardFragment newInstance(AnswerClickListener listener, int correctPosition, String imagePath, String... questionAnswers) {
         TestCardFragment testCardFragment = new TestCardFragment();
         testCardFragment.answerClickListener = listener;
         Bundle args = new Bundle();
         args.putInt("correctPosition", correctPosition);
         args.putStringArray("questionAnswers", questionAnswers);
+        args.putString("imagePath",imagePath);
         testCardFragment.setArguments(args);
         return testCardFragment;
     }
@@ -37,6 +42,7 @@ public class TestCardFragment extends Fragment implements View.OnClickListener{
         super.onCreate(savedInstanceState);
         setCorrect(getArguments().getInt("correctPosition"));
         setQuestionAnswers(getArguments().getStringArray("questionAnswers"));
+        imagePath = getArguments().getString("imagePath");
     }
 
     private void setQuestionAnswers(String[] questionAnswers) {
@@ -71,6 +77,7 @@ public class TestCardFragment extends Fragment implements View.OnClickListener{
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.test_card_view, container, false);
+        flipper = (ViewFlipper) view.findViewById(R.id.view_flipper);
         Button button1 = (Button) view.findViewById(R.id.answer_1);
         Button button2 = (Button) view.findViewById(R.id.answer_2);
         Button button3 = (Button) view.findViewById(R.id.answer_3);
@@ -85,6 +92,11 @@ public class TestCardFragment extends Fragment implements View.OnClickListener{
         button4.setText(questionAnswers[4]);
         ((TextView)view.findViewById(R.id.text_front)).setText(questionAnswers[0]);
         ((TextView)view.findViewById(R.id.text_back)).setText(questionAnswers[correctPosition]);
+        if (imagePath != null && !imagePath.equalsIgnoreCase("")) {
+            ((ImageView) view.findViewById(R.id.image)).setImageBitmap(ImageHelper.loadImage(imagePath,
+                    ImageHelper.getScreenWidthPx(getContext()),
+                    ImageHelper.getPixelsFromDp(getContext(), 200)));
+        }
         return view;
     }
 
@@ -92,6 +104,9 @@ public class TestCardFragment extends Fragment implements View.OnClickListener{
     public void onClick(View selectedAnswer) {
         if (done) { return; }
         done = true;
+        flipper.setInAnimation(this.getContext(),R.anim.card_flip_bottom_in);
+        flipper.setOutAnimation(this.getContext(),R.anim.card_flip_top_out);
+        flipper.showNext();
         if (selectedAnswer.getId() == correctId) {
             selectedAnswer.setBackgroundColor(getResources().getColor(R.color.colorAccent));
             answerClickListener.onAnswerClick(true);

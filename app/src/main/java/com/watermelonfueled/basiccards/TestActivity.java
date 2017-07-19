@@ -23,15 +23,18 @@ import static com.watermelonfueled.basiccards.CardsContract.CardEntry;
 public class TestActivity extends AppCompatActivity {
 
     public final static String SELECTED_SUBSTACKS = "SelectedSubstacks", TAG = "TESTACTIVITY", INVERSE = "inverse";
-    private final long SWIPE_DELAY = 750;
+    private final long SWIPE_DELAY = 1000;
     private NoSwipeViewPager pager;
     private ArrayList<String> substackIdsArrayList;
     private ArrayList<ArrayList<Integer>> positions;
     private String[][] cardData;
+    private int question, answer, substackId = 2, image = 3; //cardData rows
     private ArrayList<Integer> order;
     private boolean testInverse;
     private int correctCount;
     TestResultsFragment resultsFragment;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,9 +76,8 @@ public class TestActivity extends AppCompatActivity {
         }
         Cursor cursor = DbHelper.getInstance(this).loadCardsTable(substackIds);
         order = new ArrayList<>(cursor.getCount());
-        cardData = new String[3][cursor.getCount()];
+        cardData = new String[4][cursor.getCount()];
 
-        int question, answer;
         if (testInverse) {
             question = 1; answer = 0;
         } else {
@@ -86,7 +88,8 @@ public class TestActivity extends AppCompatActivity {
             cursor.moveToNext();
             cardData[question][i] = cursor.getString(cursor.getColumnIndex(CardEntry.COLUMN_QUESTION));
             cardData[answer][i] = cursor.getString(cursor.getColumnIndex(CardEntry.COLUMN_ANSWER));
-            cardData[2][i] = cursor.getString(cursor.getColumnIndex(CardEntry.COLUMN_SUBSTACK));
+            cardData[substackId][i] = cursor.getString(cursor.getColumnIndex(CardEntry.COLUMN_SUBSTACK));
+            cardData[image][i] = cursor.getString(cursor.getColumnIndex(CardEntry.COLUMN_IMAGE));
             positions.get(substackIdsArrayList.indexOf(cardData[2][i])).add(i);
             order.add(i);
         }
@@ -114,6 +117,7 @@ public class TestActivity extends AppCompatActivity {
             int orderPosition = order.get(position);
             String question = cardData[0][orderPosition];
             String correct = cardData[1][orderPosition];
+            String imagePath = cardData[3][orderPosition];
 
             ArrayList<Integer> substackPositions = new ArrayList<>(positions.get(substackIdsArrayList.indexOf(cardData[2][orderPosition])));
             Collections.shuffle(substackPositions);
@@ -131,7 +135,7 @@ public class TestActivity extends AppCompatActivity {
                     questionAnswers[i] = cardData[1][substackPositions.get(j)];
                 }
             }
-            return TestCardFragment.newInstance(this, correctPosition, questionAnswers);
+            return TestCardFragment.newInstance(this, correctPosition, imagePath, questionAnswers);
         }
 
         private final Handler handler = new Handler();
