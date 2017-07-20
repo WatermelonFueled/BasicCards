@@ -3,7 +3,6 @@ package com.watermelonfueled.basiccards;
 import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.StrictMode;
@@ -17,7 +16,6 @@ import android.widget.CheckBox;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 
 import static com.watermelonfueled.basiccards.CardsContract.StackEntry;
@@ -171,6 +169,10 @@ public class SubstackActivity extends AppCompatActivity
     public void onAddCardDialogSelectSubstack(int position) {
         addCardToSubstackIndex = position;
     }
+    @Override
+    public int getSelectedSubstack(){
+        return addCardToSubstackIndex;
+    }
 
     @Override
     public void onAddCardDialogPositiveClick(DialogFragment dialog, String front, String back,
@@ -214,33 +216,19 @@ public class SubstackActivity extends AppCompatActivity
 
         switch (requestCode) {
             case AddCardDialog.PICK_IMAGE:
-                try {
-                    InputStream inputStream = this.getContentResolver().openInputStream(data.getData());
-                    //thumbnail options
-                    BitmapFactory.Options opts = new BitmapFactory.Options();
-                    opts.inSampleSize = 4; //factor for smaller size (powers of 2)
-                    addCardDialog.image = BitmapFactory.decodeStream(inputStream, null, opts);
-                    inputStream.close(); //do i need it?
-                    addCardDialog.imageUri = data.getData();
-                    addCardDialog.imagePath = null;
-                    addCardDialog.oldPath = null;
-                    addCardDialog.checkAndDeleteCapturedPhoto();
-                    addCardDialog.fileExists = false;
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                addCardDialog.imageUri = data.getData();
+                addCardDialog.imagePath = null;
+                addCardDialog.oldPath = null;
+                addCardDialog.checkAndDeleteCapturedPhoto();
+                addCardDialog.fileExists = false;
                 break;
             case AddCardDialog.TAKE_PHOTO:
                 addCardDialog.checkAndDeleteCapturedPhoto(); // delete previous captured photo
                 addCardDialog.fileExists = true;
                 addCardDialog.imageUri = null;
-                //addCardDialog.image = ImageHelper.loadImage(addCardDialog.imagePath,addCardDialog.thumbnailView.getWidth(),addCardDialog.thumbnailView.getHeight());
                 break;
         }
         Log.d(TAG, "AddCardDialog Booleans - photoexists " + addCardDialog.photoExists+ ", fileexists "+addCardDialog.fileExists);
-        //addCardDialog.thumbnailView.setImageBitmap(addCardDialog.image);
     }
 
     public void setAddCardDialogBundle(Bundle bundle) { addCardDialogBundle = bundle; }

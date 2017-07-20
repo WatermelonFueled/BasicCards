@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -26,7 +27,9 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 
 
@@ -43,6 +46,9 @@ public class AddCardDialog extends DialogFragment implements AdapterView.OnItemS
     //File imageFile, oldFile;
     ImageView thumbnailView;
     boolean fileExists = false, photoExists = false;
+
+    EditText frontInput, backInput;
+    String front, back;
 
     private AddCardDialogListener listener;
     private ArrayList<String> substack;
@@ -64,6 +70,8 @@ public class AddCardDialog extends DialogFragment implements AdapterView.OnItemS
             bundle.putString("imageUri", imageUri.toString());
         }
         bundle.putStringArrayList("substack", substack);
+        bundle.putString("front",front);
+        bundle.putString("back",back);
         Log.d(TAG, "Bundled: " + imagePath + ", " + oldPath + ", " + fileExists + ", " + photoExists);
         return bundle;
     }
@@ -79,6 +87,11 @@ public class AddCardDialog extends DialogFragment implements AdapterView.OnItemS
             //no uri saved to bundle
         }
         substack = bundle.getStringArrayList("substack");
+        front = bundle.getString("front");
+        back = bundle.getString("back");
+
+
+
         Log.d(TAG, "Unbundled: " + imagePath + ", " + oldPath + ", " + fileExists + ", " + photoExists);
     }
 
@@ -102,6 +115,7 @@ public class AddCardDialog extends DialogFragment implements AdapterView.OnItemS
     public interface AddCardDialogListener{
         void onAddCardDialogPositiveClick(DialogFragment dialog, String front, String back, boolean fileExists, Uri imageUri, String imagePath);
         void onAddCardDialogSelectSubstack(int position);
+        int getSelectedSubstack();
     }
 
 
@@ -128,6 +142,7 @@ public class AddCardDialog extends DialogFragment implements AdapterView.OnItemS
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
         spinner.setOnItemSelectedListener(this);
+        spinner.setSelection(listener.getSelectedSubstack());
 
         Button addImageButton = (Button) dialogView.findViewById(R.id.addImageButton);
         addImageButton.setOnClickListener(new View.OnClickListener() {
@@ -159,24 +174,42 @@ public class AddCardDialog extends DialogFragment implements AdapterView.OnItemS
             @Override
             public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
                 if (imagePath != null) { image = ImageHelper.loadImage(imagePath, thumbnailView.getWidth(),thumbnailView.getHeight()); }
+                if (imageUri != null) {
+                    try {
+                        InputStream is = getActivity().getContentResolver().openInputStream(imageUri);
+                        BitmapFactory.Options opts = new BitmapFactory.Options();
+                        opts.inSampleSize = 4;
+                        image = BitmapFactory.decodeStream(is, null, opts);
+                        is.close();
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
                 if (image != null) { thumbnailView.setImageBitmap(image); }
             }
         });
+
+        frontInput = (EditText) dialogView.findViewById(R.id.inputQuestion);
+        backInput = (EditText) dialogView.findViewById(R.id.inputAnswer);
+
+        frontInput.setText(front);
+        backInput.setText(back);
 
         builder.setTitle("Add Card")
                 .setView(dialogView)
                 .setPositiveButton("Add", new DialogInterface.OnClickListener(){
                     @Override
                     public void onClick(DialogInterface dialog, int id){
-                        EditText frontInput = (EditText) dialogView.findViewById(R.id.inputQuestion);
-                        EditText backInput = (EditText) dialogView.findViewById(R.id.inputAnswer);
 
-                        Log.d(TAG, "Positive click: " + frontInput.getText().toString() +", "+
-                        backInput.getText().toString()+", "+photoExists+", "+imageUri+", "+imagePath);
+                        front = frontInput.getText().toString();
+                        back = backInput.getText().toString();
+                        Log.d(TAG, "Positive click: " + front +", "+ back+", "+
+                                photoExists+", "+imageUri+", "+imagePath);
 
                         listener.onAddCardDialogPositiveClick(AddCardDialog.this,
-                                frontInput.getText().toString(), backInput.getText().toString(),
-                                photoExists, imageUri, imagePath);
+                                front, back, photoExists, imageUri, imagePath);
 
                     }
                 })
@@ -258,6 +291,9 @@ public class AddCardDialog extends DialogFragment implements AdapterView.OnItemS
         //oldFile = imageFile;
         oldPath = imagePath;
 
+        front = frontInput.getText().toString();
+        back = backInput.getText().toString();
+
         SubstackActivity activity = (SubstackActivity) getActivity();
         activity.setAddCardDialogBundle(bundleState());
 
@@ -278,6 +314,9 @@ public class AddCardDialog extends DialogFragment implements AdapterView.OnItemS
                 oldPath = imagePath;
                 File imageFile = DbHelper.createImageFile();
                 imagePath = imageFile.getAbsolutePath();
+
+                front = frontInput.getText().toString();
+                back = backInput.getText().toString();
 
                 SubstackActivity activity = (SubstackActivity) getActivity();
                 activity.setAddCardDialogBundle(bundleState());
