@@ -1,9 +1,7 @@
 package com.watermelonfueled.basiccards;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.support.v4.app.DialogFragment;
@@ -14,28 +12,26 @@ import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 
 import static com.watermelonfueled.basiccards.CardsContract.StackEntry;
 import static com.watermelonfueled.basiccards.CardsContract.SubstackEntry;
 
 public class SubstackActivity extends AppCompatActivity
-        implements SubstackViewAdapter.ListItemClickListener,
+        implements StackViewAdapter.ListItemClickListener,
         AddStackDialog.AddStackDialogListener,
-        DeleteDialog.DeleteDialogListener,
-        AddCardDialog.AddCardDialogListener{
+        DeleteDialog.DeleteDialogListener {
 
     private final String TAG = "SubstackActivity";
 
     private DbHelper dbHelper;
-    private int stackId, toDeleteIndex, addCardToSubstackIndex = 0 ;
-    private SubstackViewAdapter adapter;
+    private int stackId, toDeleteOrEditId, addCardToSubstackIndex = 0 ;
+    private StackViewAdapter adapter;
     private ArrayList<String> substackNameList;
     private ArrayList<Integer> substackIdList;
     private ArrayList<Boolean> substackSelectedList;
-    private String toDeleteName;
+    private String toDeleteOrEditName;
+    Type dialogType;
 
     private final String    STACK_ID_KEY = "stackidkey",
                             ADD_CARD_SUBSTACK_INDEX_KEY = "addcardsubstackindexkey";
@@ -47,10 +43,7 @@ public class SubstackActivity extends AppCompatActivity
 
         if (savedInstanceState != null) {
             stackId = savedInstanceState.getInt(STACK_ID_KEY);
-            addCardToSubstackIndex = savedInstanceState.getInt(ADD_CARD_SUBSTACK_INDEX_KEY, 0);
-            if (savedInstanceState.containsKey("addCardDialogBundle")) {
-                addCardDialogBundle = savedInstanceState.getBundle("addCardDialogBundle");
-            }
+            substackSelectedList = (ArrayList) savedInstanceState.getSerializable("substackSelectedList");
         } else {
             Intent intent = getIntent();
             stackId = intent.getIntExtra(StackEntry._ID, 0);
@@ -71,34 +64,11 @@ public class SubstackActivity extends AppCompatActivity
     }
 
     @Override
-    protected void onResume() {
-        if (addCardDialog != null) {
-            addCardDialog.show(getSupportFragmentManager(), "AddCardDialog");
-        }
-        super.onResume();
-    }
-
-    @Override
     public void onSaveInstanceState(Bundle outState){
         outState.putInt(STACK_ID_KEY, stackId);
-        outState.putInt(ADD_CARD_SUBSTACK_INDEX_KEY, addCardToSubstackIndex);
-        if (addCardDialogBundle != null) {
-            outState.putBundle("addCardDialogBundle", addCardDialogBundle);
-        }
+        outState.putSerializable("substackSelectedList", substackSelectedList);
 
         super.onSaveInstanceState(outState);
-    }
-
-    @Override
-    public void onRestoreInstanceState(Bundle savedInstanceState) {
-        if (savedInstanceState != null) {
-            stackId = savedInstanceState.getInt(STACK_ID_KEY);
-            addCardToSubstackIndex = savedInstanceState.getInt(ADD_CARD_SUBSTACK_INDEX_KEY, 0);
-            if(savedInstanceState.containsKey("addCardDialogBundle")) {
-                addCardDialogBundle = savedInstanceState.getBundle("addCardDialogBundle");
-            }
-        }
-        super.onRestoreInstanceState(savedInstanceState);
     }
 
     private void setView() {
@@ -106,7 +76,8 @@ public class SubstackActivity extends AppCompatActivity
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         rv.setLayoutManager(layoutManager);
         rv.setHasFixedSize(true);
-        adapter = new SubstackViewAdapter(this, substackNameList);
+        adapter = new StackViewAdapter(this, substackNameList, R.layout.substack_view);
+        adapter.setSubstackSelectedList(substackSelectedList);
         rv.setAdapter(adapter);
     }
 
@@ -123,132 +94,88 @@ public class SubstackActivity extends AppCompatActivity
         cursor.close();
     }
 
-    @Override
-    public void onListItemClick(int clickedItemIndex) {
-        substackSelectedList.set(clickedItemIndex, !substackSelectedList.get(clickedItemIndex));
-        Log.i("SUBSTACKACTIVITY", "set index: " + clickedItemIndex + " to: " + substackSelectedList.get(clickedItemIndex));
-    }
-
+    // ADD AND EDIT SUBSTACK //
     public void addSubstackOnClick(View button) {
+        dialogType = Type.CREATE;
         DialogFragment dialog = new AddStackDialog();
         dialog.show(getSupportFragmentManager(), "AddSubstackDialog");
     }
 
     @Override
     public void onAddStackDialogPositiveClick(DialogFragment dialog, String substackName) {
-        dbHelper.addSubstack(substackName,stackId);
+        switch (getType()) {
+            case CREATE:
+                dbHelper.addSubstack(substackName,stackId);
+                break;
+            case EDIT:
+                if (substackName.equals(toDeleteOrEditName)) {
+                    return; //no change
+                }
+                dbHelper.updateSubstack(toDeleteOrEditId, substackName);
+                break;
+        }
         updated();
     }
 
+    public void editButtonOnClick(View button) {
+        dialogType = Type.EDIT;
+        int position = (int) button.getTag();
+        toDeleteOrEditId = substackIdList.get(position);
+        toDeleteOrEditName = substackNameList.get(position);
+        DialogFragment dialog = new AddStackDialog();
+        dialog.show(getSupportFragmentManager(), "DeleteSubstackDialog");
+    }
+
     public void deleteButtonOnClick(View button) {
-        toDeleteIndex = (int) button.getTag();
-        toDeleteName = substackNameList.get(toDeleteIndex);
+        int position = (int) button.getTag();
+        toDeleteOrEditId = substackIdList.get(position);
+        toDeleteOrEditName = substackNameList.get(position);
         DeleteDialog dialog = new DeleteDialog();
         dialog.setConfirmMessage("Are you sure you want to delete: " +
-                toDeleteName + "? All its contents will be deleted.");
+                toDeleteOrEditName + "? All its contents will be deleted.");
         dialog.show(getSupportFragmentManager(), "DeleteSubstackDialog");
     }
 
     @Override
     public void onDeleteDialogPositiveClick(DialogFragment dialog) {
-        dbHelper.deleteSubstack(substackIdList.get(toDeleteIndex));
+        dbHelper.deleteSubstack(toDeleteOrEditId);
         updated();
     }
 
-
-    private AddCardDialog addCardDialog;
-    private Bundle addCardDialogBundle;
-
-    public void addCardOnClick(View button) {
-        addCardDialog = new AddCardDialog();
-        addCardDialog.setSubstackNames(substackNameList);
-        addCardDialog.show(getSupportFragmentManager(), "AddCardDialog");
+    @Override
+    public Type getType(){
+        return dialogType;
     }
 
     @Override
-    public void onAddCardDialogSelectSubstack(int position) {
-        addCardToSubstackIndex = position;
+    public String getNameToEdit() {
+        return toDeleteOrEditName;
     }
+
+    //LIST AND TEST
     @Override
-    public int getSelectedSubstack(){
-        return addCardToSubstackIndex;
+    public void onListItemClick(int clickedItemIndex) {
+        substackSelectedList.set(clickedItemIndex, !substackSelectedList.get(clickedItemIndex));
+        Log.i("SUBSTACKACTIVITY", "set index: " + clickedItemIndex + " to: " + substackSelectedList.get(clickedItemIndex));
     }
-
-    @Override
-    public void onAddCardDialogPositiveClick(DialogFragment dialog, String front, String back,
-                                             boolean photoExists, Uri imageUri, String imagePath) {
-        if (photoExists) {
-            if (imageUri == null) {
-                dbHelper.addCard(front, back, substackIdList.get(addCardToSubstackIndex), imagePath);
-            } else {
-                try {
-                    dbHelper.addCard(front, back, substackIdList.get(addCardToSubstackIndex),
-                            dbHelper.storeImage(imageUri));
-                } catch (FileNotFoundException e) {
-                } catch (IOException e) {
-                }
-            }
-        } else {
-            dbHelper.addCard(front, back, substackIdList.get(addCardToSubstackIndex), "");
-        }
-        updated();
-        addCardToSubstackIndex = 0;
-        addCardDialog.dismiss();
-        addCardDialog = null;
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.d(TAG, "onActivityResult called - requestCode: " + requestCode+ " resultCode: " + resultCode);
-        super.onActivityResult(requestCode,resultCode,data);
-        addCardDialog = new AddCardDialog();
-        addCardDialog.unbundleState(addCardDialogBundle);
-//        if (resultCode != Activity.RESULT_OK || data == null || data.getData() == null) {
-        if (resultCode != Activity.RESULT_OK) {
-            // not okay result code
-            if (addCardDialog.oldPath != null) {
-                addCardDialog.imagePath = addCardDialog.oldPath;
-            }
-            return;
-        }
-
-        addCardDialog.photoExists = true;
-
-        switch (requestCode) {
-            case AddCardDialog.PICK_IMAGE:
-                addCardDialog.imageUri = data.getData();
-                addCardDialog.imagePath = null;
-                addCardDialog.oldPath = null;
-                addCardDialog.checkAndDeleteCapturedPhoto();
-                addCardDialog.fileExists = false;
-                break;
-            case AddCardDialog.TAKE_PHOTO:
-                addCardDialog.checkAndDeleteCapturedPhoto(); // delete previous captured photo
-                addCardDialog.fileExists = true;
-                addCardDialog.imageUri = null;
-                break;
-        }
-        Log.d(TAG, "AddCardDialog Booleans - photoexists " + addCardDialog.photoExists+ ", fileexists "+addCardDialog.fileExists);
-    }
-
-    public void setAddCardDialogBundle(Bundle bundle) { addCardDialogBundle = bundle; }
-    public void startAddCardDialogIntent(Intent intent, int request) {
-        addCardDialog.dismiss();
-        addCardDialog = null;
-        startActivityForResult(intent, request);
-    }
-
 
     public void showCardListOnClick(View button) {
         Intent intent = new Intent(this, CardListActivity.class);
-        String[] arr = selectedSubstackIdsArray();
-        if (arr.length <= 0) { return; }
-        intent.putExtra(CardListActivity.SELECTED_SUBSTACKS, arr);
+//        String[] idArray = selectedSubstackArray(substackIdList);
+//        if (idArray.length <= 0) { return; }
+//        String[] nameArray = selectedSubstackArray(substackNameList);
+//        if (nameArray.length <= 0) { return; }
+        ArrayList selectedSubstacks = selectedSubstackArrayList(substackIdList);
+        if (selectedSubstacks.isEmpty()) { return; }
+        intent.putIntegerArrayListExtra(CardListActivity.SELECTED_SUBSTACKS, selectedSubstacks);
+        intent.putStringArrayListExtra(CardListActivity.SELECTED_SUBSTACK_NAMES, selectedSubstackArrayList(substackNameList));
+        intent.putIntegerArrayListExtra(CardListActivity.ALL_SUBSTACKS, substackIdList);
+        intent.putStringArrayListExtra(CardListActivity.ALL_SUBSTACK_NAMES, substackNameList);
         startActivity(intent);
     }
 
     public void startTestOnClick(View button) {
-        String[] arr = selectedSubstackIdsArray();
+        String[] arr = selectedSubstackArray(substackIdList);
         if (arr.length <= 0) { return; }
 
         boolean testInverse = ((CheckBox) findViewById(R.id.inverse_checkbox)).isChecked();
@@ -258,11 +185,11 @@ public class SubstackActivity extends AppCompatActivity
         startActivity(intent);
     }
 
-    private String[] selectedSubstackIdsArray() {
+    private String[] selectedSubstackArray(ArrayList list) {
         ArrayList<String> selectedSubstackIds = new ArrayList<>();
         for (int i = 0; i < substackIdList.size(); i++) {
             if (substackSelectedList.get(i)){
-                selectedSubstackIds.add(substackIdList.get(i).toString());
+                selectedSubstackIds.add(list.get(i).toString());
             }
         }
         String[] arr = new String[selectedSubstackIds.size()];
@@ -270,6 +197,17 @@ public class SubstackActivity extends AppCompatActivity
         return arr;
     }
 
+    private ArrayList selectedSubstackArrayList(ArrayList list) {
+        ArrayList selectedList = new ArrayList();
+        for (int i = 0; i < substackIdList.size(); i++) {
+            if (substackSelectedList.get(i)){
+                selectedList.add(list.get(i));
+            }
+        }
+        return selectedList;
+    }
+
+    //update
     private void updated() {
         loadSubstackList();
         adapter.updated(substackNameList);

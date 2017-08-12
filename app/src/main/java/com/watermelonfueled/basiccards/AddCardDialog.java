@@ -43,16 +43,22 @@ public class AddCardDialog extends DialogFragment implements AdapterView.OnItemS
     Bitmap image;
     Uri imageUri;
     String imagePath, oldPath;
-    //File imageFile, oldFile;
     ImageView thumbnailView;
     boolean fileExists = false, photoExists = false;
 
     EditText frontInput, backInput;
     String front, back;
+    int selectedSubstackIndex = 0;
 
-    private AddCardDialogListener listener;
     private ArrayList<String> substack;
 
+    private AddCardDialogListener listener;
+    public interface AddCardDialogListener{
+        void onAddCardDialogPositiveClick(DialogFragment dialog, String front, String back, boolean fileExists, Uri imageUri, String imagePath);
+        void onAddCardDialogSelectSubstack(int position);
+        void onAddCardDialogNegativeClick();
+        void onAddCardDialogImageRemove();
+    }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
@@ -72,6 +78,7 @@ public class AddCardDialog extends DialogFragment implements AdapterView.OnItemS
         bundle.putStringArrayList("substack", substack);
         bundle.putString("front",front);
         bundle.putString("back",back);
+        bundle.putInt("selectedSubstackIndex", selectedSubstackIndex);
         Log.d(TAG, "Bundled: " + imagePath + ", " + oldPath + ", " + fileExists + ", " + photoExists);
         return bundle;
     }
@@ -89,8 +96,7 @@ public class AddCardDialog extends DialogFragment implements AdapterView.OnItemS
         substack = bundle.getStringArrayList("substack");
         front = bundle.getString("front");
         back = bundle.getString("back");
-
-
+        selectedSubstackIndex = bundle.getInt("selectedSubstackIndex");
 
         Log.d(TAG, "Unbundled: " + imagePath + ", " + oldPath + ", " + fileExists + ", " + photoExists);
     }
@@ -98,26 +104,20 @@ public class AddCardDialog extends DialogFragment implements AdapterView.OnItemS
     @Override
     public void onViewStateRestored(Bundle savedInstanceState){
         unbundleState(savedInstanceState.getBundle("bundle"));
-
         super.onViewStateRestored(savedInstanceState);
     }
+
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         listener.onAddCardDialogSelectSubstack(position);
+        selectedSubstackIndex = position;
     }
 
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
         listener.onAddCardDialogSelectSubstack(0);  // default 1st option
     }
-
-    public interface AddCardDialogListener{
-        void onAddCardDialogPositiveClick(DialogFragment dialog, String front, String back, boolean fileExists, Uri imageUri, String imagePath);
-        void onAddCardDialogSelectSubstack(int position);
-        int getSelectedSubstack();
-    }
-
 
 
     @Override
@@ -142,7 +142,7 @@ public class AddCardDialog extends DialogFragment implements AdapterView.OnItemS
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
         spinner.setOnItemSelectedListener(this);
-        spinner.setSelection(listener.getSelectedSubstack());
+        spinner.setSelection(selectedSubstackIndex);
 
         Button addImageButton = (Button) dialogView.findViewById(R.id.addImageButton);
         addImageButton.setOnClickListener(new View.OnClickListener() {
@@ -169,6 +169,8 @@ public class AddCardDialog extends DialogFragment implements AdapterView.OnItemS
             }
         });
 
+        final Button removeImageButton = (Button) dialogView.findViewById(R.id.removeImageButton);
+
         thumbnailView = (ImageView) dialogView.findViewById(R.id.thumbnail);
         thumbnailView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
             @Override
@@ -187,7 +189,32 @@ public class AddCardDialog extends DialogFragment implements AdapterView.OnItemS
                         e.printStackTrace();
                     }
                 }
-                if (image != null) { thumbnailView.setImageBitmap(image); }
+                if (image != null) {
+                    thumbnailView.setImageBitmap(image);
+                    removeImageButton.setClickable(true);
+                    removeImageButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Log.d(TAG, "RemoveImageButton clicked.");
+                            thumbnailView.setImageDrawable(null);
+                            image = null;
+                            imageUri = null;
+
+                            oldPath = imagePath;
+                            imagePath = null;
+
+                            listener.onAddCardDialogImageRemove();
+                            checkAndDeleteCapturedPhoto();
+
+                            fileExists = false;
+                            photoExists = false;
+
+                            removeImageButton.setClickable(false);
+
+                            thumbnailView.invalidate();
+                        }
+                    });
+                }
             }
         });
 
@@ -218,7 +245,8 @@ public class AddCardDialog extends DialogFragment implements AdapterView.OnItemS
                     public void onClick(DialogInterface dialog, int id) {
                         //oldFile = imageFile;
                         oldPath = imagePath;
-                        checkAndDeleteCapturedPhoto();
+                        //checkAndDeleteCapturedPhoto();
+                        listener.onAddCardDialogNegativeClick();
                     }
                 });
         return builder.create();
@@ -226,75 +254,22 @@ public class AddCardDialog extends DialogFragment implements AdapterView.OnItemS
 
     public static final int PICK_IMAGE = 1, TAKE_PHOTO = 2, REQUEST_CAMERA_PERMISSION = 3;
 
-
-//    @Override
-//    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        Log.d(TAG, "onActivityResult called - requestCode: " + requestCode+ " resultCode: " + resultCode);
-//        super.onActivityResult(requestCode,resultCode,data);
-//        if (resultCode != Activity.RESULT_OK || data == null || data.getData() == null) {
-//            // not okay result code
-//            if (oldPath != null) {
-//                imagePath = oldPath;
-//            }
-//            return;
-//        }
-//        photoExists = true;
-//
-//        switch (requestCode) {
-//            case PICK_IMAGE:
-//                Log.d(TAG, "OnActivityResult for PICK IMAGE intent");
-//                try {
-//                    InputStream inputStream = getContext().getContentResolver().openInputStream(data.getData());
-//                    //thumbnail options
-//                    BitmapFactory.Options opts = new BitmapFactory.Options();
-//                    opts.outHeight = thumbnailView.getHeight();
-//                    opts.outWidth = thumbnailView.getWidth();
-//                    opts.inSampleSize = 4; //factor for smaller size (powers of 2)
-//                    image = BitmapFactory.decodeStream(inputStream, null, opts);
-//                    inputStream.close(); //do i need it?
-//                    imageUri = data.getData();
-//                    imagePath = null;
-//                    oldPath = null;
-//                    checkAndDeleteCapturedPhoto();
-//                    fileExists = false;
-//                } catch (FileNotFoundException e) {
-//                    e.printStackTrace();
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//                break;
-//            case TAKE_PHOTO:
-//                Log.d(TAG, "OnActivityResult for TAKE PHOTO intent");
-//                checkAndDeleteCapturedPhoto(); // delete previous captured photo
-//                fileExists = true;
-//                imageUri = null;
-//                //imagePath = imageFile.getAbsolutePath();
-//                image = ImageHelper.loadImage(imagePath,thumbnailView.getWidth(),thumbnailView.getHeight());
-//                break;
-//
-//        }
-//
-//        thumbnailView.setImageBitmap(image);
-//
-//    }
-
     public void checkAndDeleteCapturedPhoto() {
-        if (fileExists) {
+        if (oldPath != null && !oldPath.equals("")) {
             Log.d(TAG, "Deleting: " + oldPath);
-//            oldFile.delete();
             File oldFile = new File(oldPath);
             oldFile.delete();
+            oldPath = null;
         }
     }
 
     private void pickGalleryImage(){
-        //oldFile = imageFile;
         oldPath = imagePath;
 
         front = frontInput.getText().toString();
         back = backInput.getText().toString();
 
-        SubstackActivity activity = (SubstackActivity) getActivity();
+        CardListActivity activity = (CardListActivity) getActivity();
         activity.setAddCardDialogBundle(bundleState());
 
         Intent intent = new Intent();
@@ -302,15 +277,12 @@ public class AddCardDialog extends DialogFragment implements AdapterView.OnItemS
         intent.setAction(Intent.ACTION_GET_CONTENT);
 
         activity.startAddCardDialogIntent(intent,PICK_IMAGE);
-
-        //getActivity().startActivityForResult(Intent.createChooser(intent, "Select Image"), PICK_IMAGE);
     }
 
     private void takePhoto() {
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (intent.resolveActivity(getContext().getPackageManager()) != null) {
             try {
-                //oldFile = imageFile;
                 oldPath = imagePath;
                 File imageFile = DbHelper.createImageFile();
                 imagePath = imageFile.getAbsolutePath();
@@ -318,15 +290,13 @@ public class AddCardDialog extends DialogFragment implements AdapterView.OnItemS
                 front = frontInput.getText().toString();
                 back = backInput.getText().toString();
 
-                SubstackActivity activity = (SubstackActivity) getActivity();
+                CardListActivity activity = (CardListActivity) getActivity();
                 activity.setAddCardDialogBundle(bundleState());
 
                 Uri uri = FileProvider.getUriForFile(getContext(), "com.watermelonfueled.basiccards.fileprovider", imageFile);
                 intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
 
                 activity.startAddCardDialogIntent(intent, TAKE_PHOTO);
-
-                //getActivity().startActivityForResult(intent, TAKE_PHOTO);
             } catch (SecurityException e) {
                 e.printStackTrace();
             } catch (IOException e) {

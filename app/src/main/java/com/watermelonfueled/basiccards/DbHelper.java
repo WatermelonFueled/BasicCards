@@ -96,6 +96,74 @@ public class DbHelper extends SQLiteOpenHelper {
 //        onCreate(sqLiteDatabase);
     }
 
+    //CREATE
+    public void addStack(String name) {
+        ContentValues cv = new ContentValues();
+        cv.put(StackEntry.COLUMN_NAME, name);
+        db.insert(StackEntry.TABLE_NAME, null, cv);
+    }
+
+    public void addSubstack(String name, int stackId) {
+        ContentValues cv = new ContentValues();
+        cv.put(SubstackEntry.COLUMN_NAME, name);
+        cv.put(SubstackEntry.COLUMN_STACK, stackId);
+        db.insert(SubstackEntry.TABLE_NAME, null, cv);
+    }
+
+//    public void addCard(String question, String answer, int substackId, Uri imageUri) {
+//        ContentValues cv = new ContentValues();
+//        cv.put(CardEntry.COLUMN_QUESTION, question);
+//        cv.put(CardEntry.COLUMN_ANSWER, answer);
+//        cv.put(CardEntry.COLUMN_SUBSTACK, substackId);
+//        try {
+//            String imagePath = storeImage(imageUri);
+//            cv.put(CardEntry.COLUMN_IMAGE, imagePath);
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        db.insert(CardEntry.TABLE_NAME, null, cv);
+//    }
+
+    public void addCard(String question, String answer, int substackId, String imagePath) {
+        ContentValues cv = new ContentValues();
+        cv.put(CardEntry.COLUMN_QUESTION, question);
+        cv.put(CardEntry.COLUMN_ANSWER, answer);
+        cv.put(CardEntry.COLUMN_SUBSTACK, substackId);
+
+        cv.put(CardEntry.COLUMN_IMAGE, imagePath);
+
+        db.insert(CardEntry.TABLE_NAME, null, cv);
+    }
+
+    public String storeImage(Uri uri) throws FileNotFoundException, IOException{
+        InputStream inputStream = con.getContentResolver().openInputStream(uri);
+        File imageFile = createImageFile();
+        OutputStream outputStream = new FileOutputStream(imageFile);
+
+        byte[] buffer = new byte[1024];
+        int length;
+        while((length=inputStream.read(buffer))>0) {
+            outputStream.write(buffer,0,length);
+        }
+        outputStream.close();
+        inputStream.close();
+
+        String imagePath = imageFile.getAbsolutePath();
+        Log.d(TAG, "Created image file. imagePath:" + imagePath.toString());
+        return imagePath;
+    }
+
+    public static File createImageFile() throws IOException {
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String fileName = "Card_" + timeStamp + "_";
+        File storageDir = con.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File imageFile = File.createTempFile(fileName,".jpg",storageDir);
+        return imageFile;
+    }
+
+    //READ
     public Cursor loadStackTable() {
         String[] columns = {
                 StackEntry._ID,
@@ -154,70 +222,35 @@ public class DbHelper extends SQLiteOpenHelper {
         );
     }
 
-    public void addStack(String name) {
+    //UPDATE
+    public boolean updateStack(int id, String newName){
         ContentValues cv = new ContentValues();
-        cv.put(StackEntry.COLUMN_NAME, name);
-        db.insert(StackEntry.TABLE_NAME, null, cv);
+        cv.put(StackEntry.COLUMN_NAME, newName);
+        String selection = StackEntry._ID + "=?";
+        String[] selectionArgs = { String.valueOf(id) };
+        int count = db.update(StackEntry.TABLE_NAME, cv, selection, selectionArgs);
+        if (count <= 0 ) { return false; } else { return true; }
     }
 
-    public void addSubstack(String name, int stackId) {
+    public boolean updateSubstack(int id, String newName){
         ContentValues cv = new ContentValues();
-        cv.put(SubstackEntry.COLUMN_NAME, name);
-        cv.put(SubstackEntry.COLUMN_STACK, stackId);
-        db.insert(SubstackEntry.TABLE_NAME, null, cv);
+        cv.put(SubstackEntry.COLUMN_NAME, newName);
+        String selection = SubstackEntry._ID + "=?";
+        String[] selectionArgs = { String.valueOf(id) };
+        int count = db.update(SubstackEntry.TABLE_NAME, cv, selection, selectionArgs);
+        if (count <= 0 ) { return false; } else { return true; }
     }
 
-    public void addCard(String question, String answer, int substackId, Uri imageUri) {
+    public boolean updateCard(int id, int substackId, String question, String answer, String imagePath) {
         ContentValues cv = new ContentValues();
+        cv.put(CardEntry.COLUMN_SUBSTACK, substackId);
         cv.put(CardEntry.COLUMN_QUESTION, question);
         cv.put(CardEntry.COLUMN_ANSWER, answer);
-        cv.put(CardEntry.COLUMN_SUBSTACK, substackId);
-        try {
-            String imagePath = storeImage(imageUri);
-            cv.put(CardEntry.COLUMN_IMAGE, imagePath);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        db.insert(CardEntry.TABLE_NAME, null, cv);
-    }
-
-    public void addCard(String question, String answer, int substackId, String imagePath) {
-        ContentValues cv = new ContentValues();
-        cv.put(CardEntry.COLUMN_QUESTION, question);
-        cv.put(CardEntry.COLUMN_ANSWER, answer);
-        cv.put(CardEntry.COLUMN_SUBSTACK, substackId);
-
         cv.put(CardEntry.COLUMN_IMAGE, imagePath);
-
-        db.insert(CardEntry.TABLE_NAME, null, cv);
-    }
-
-    public String storeImage(Uri uri) throws FileNotFoundException, IOException{
-        InputStream inputStream = con.getContentResolver().openInputStream(uri);
-        File imageFile = createImageFile();
-        OutputStream outputStream = new FileOutputStream(imageFile);
-
-        byte[] buffer = new byte[1024];
-        int length;
-        while((length=inputStream.read(buffer))>0) {
-            outputStream.write(buffer,0,length);
-        }
-        outputStream.close();
-        inputStream.close();
-
-        String imagePath = imageFile.getAbsolutePath();
-        Log.d(TAG, "Created image file. imagePath:" + imagePath.toString());
-        return imagePath;
-    }
-
-    public static File createImageFile() throws IOException {
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String fileName = "Card_" + timeStamp + "_";
-        File storageDir = con.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        File imageFile = File.createTempFile(fileName,".jpg",storageDir);
-        return imageFile;
+        String selection = CardEntry._ID +"=?";
+        String[] selectionArgs = { String.valueOf(id) };
+        int count = db.update(CardEntry.TABLE_NAME, cv, selection, selectionArgs);
+        if (count <= 0 ) { return false; } else { return true; }
     }
 
     public void deleteStack(int id) {
@@ -232,22 +265,41 @@ public class DbHelper extends SQLiteOpenHelper {
     }
 
     public void deleteSubstack(int id) {
-        db.delete(CardEntry.TABLE_NAME, CardEntry.COLUMN_SUBSTACK + "=" + id, null);
+        //db.delete(CardEntry.TABLE_NAME, CardEntry.COLUMN_SUBSTACK + "=" + id, null);
+        //Cursor cursor = loadCardsTable(new String[]{Integer.toString(id)});
+        Cursor cursor = db.rawQuery("SELECT "+CardEntry._ID+" FROM "+CardEntry.TABLE_NAME+" WHERE "+CardEntry.COLUMN_SUBSTACK+"=?", new String[]{id+""});
+        boolean successfulCardDelete = true;
+        while (cursor.moveToNext()) {
+            int cardId = cursor.getInt(cursor.getColumnIndex(CardEntry._ID));
+            successfulCardDelete = deleteCard(cardId);
+            if (!successfulCardDelete) {
+                //failed to delete a card (failed to delete image file)
+                Log.d(TAG, "Failed to delete card ID: " + cardId + ". Cancelling remainder of delete substack ID: " + id);
+                return;
+            }
+        }
         db.delete(SubstackEntry.TABLE_NAME, SubstackEntry._ID + "=" + id, null);
     }
 
-    public void deleteCard(int id) {
+    public boolean deleteCard(int id) {
         Cursor cursor = db.rawQuery("SELECT " + CardEntry.COLUMN_IMAGE + " FROM "
                 + CardEntry.TABLE_NAME + " WHERE " + CardEntry._ID + "=?", new String[] {id+""});
         if(cursor.moveToNext()){
-            File file = new File(cursor.getString(cursor.getColumnIndex(CardEntry.COLUMN_IMAGE)));
-            Log.d(TAG, "Deleting: " + file.toString());
-            if (file.delete()) {
-                db.delete(CardEntry.TABLE_NAME, CardEntry._ID + "=" + id, null);
-            } else {
-                //failed to delete file
-                //TODO decide whether to still delete row
+            String imagePath = cursor.getString(cursor.getColumnIndex(CardEntry.COLUMN_IMAGE));
+            if (imagePath != null && !imagePath.equals("")) {
+                File file = new File(imagePath);
+                Log.d(TAG, "Deleting: " + file.toString());
+                if (!file.delete()) {
+                    //failed to delete file
+                    //TODO decide whether to still delete row
+                    return false;
+                }
             }
+            Log.d(TAG, "Deleted card - id: " + id);
+            db.delete(CardEntry.TABLE_NAME, CardEntry._ID + "=" + id, null);
+            return true;
         }
+        return  false;
     }
+
 }

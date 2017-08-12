@@ -6,12 +6,19 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.watermelonfueled.basiccards.CardListActivity">
+    <Button
+        android:id="@+id/add_card_button"
+        android:text="Add card"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="addCardButtonOnClick"/>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rv_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:paddingBottom="6dp"
-        android:clipToPadding="false"/>
+        android:clipToPadding="false"
+        />
 
 </LinearLayout>

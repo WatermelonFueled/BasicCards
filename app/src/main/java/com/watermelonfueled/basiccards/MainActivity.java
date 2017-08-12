@@ -25,8 +25,10 @@ public class MainActivity extends AppCompatActivity
     private ArrayList<String> stackNameList;
     private ArrayList<Integer> stackIdList;
     private StackViewAdapter adapter;
-    private int toDeleteIndex;
-    private String toDeleteName;
+    private int toDeleteOrEditId;
+    private String toDeleteOrEditName;
+
+    Type dialogType;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +45,7 @@ public class MainActivity extends AppCompatActivity
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         rv.setLayoutManager(layoutManager);
         rv.setHasFixedSize(true);
-        adapter = new StackViewAdapter(this, stackNameList);
+        adapter = new StackViewAdapter(this, stackNameList, R.layout.stack_view);
         rv.setAdapter(adapter);
     }
 
@@ -67,31 +69,67 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void addStackOnClick(View button){
+        dialogType = Type.CREATE;
         DialogFragment dialog = new AddStackDialog();
         dialog.show(getSupportFragmentManager(), "AddStackDialog");
     }
 
     @Override
     public void onAddStackDialogPositiveClick(DialogFragment dialog, String stackName) {
-        dbHelper.addStack(stackName);
-        updated();
-        makeToast("Added: "+stackName);
+        String toast;
+        switch (getType()) {
+            case CREATE:
+                dbHelper.addStack(stackName);
+                toast = "Added: " + stackName;
+                break;
+            case EDIT:
+                if (stackName.equals(toDeleteOrEditName)){
+                    return; //no change
+                }
+                dbHelper.updateStack(toDeleteOrEditId, stackName);
+                toast = "Changed " + toDeleteOrEditName + " to " + stackName;
+                break;
+            default:
+                toast = "";
+        }
+        updated(); //TODO update single item instead of general update
+        makeToast(toast);
+    }
+
+    public void editButtonOnClick(View button) {
+        dialogType = Type.EDIT;
+        int position = (int) button.getTag();
+        toDeleteOrEditId = stackIdList.get(position);
+        toDeleteOrEditName = stackNameList.get(position);
+        DialogFragment dialog = new AddStackDialog();
+        dialog.show(getSupportFragmentManager(), "EditStackDialog");
     }
 
     public void deleteButtonOnClick(View button) {
-        toDeleteIndex = (int) button.getTag();
-        toDeleteName = stackNameList.get(toDeleteIndex);
+        int position = (int) button.getTag();
+        toDeleteOrEditId = stackIdList.get(position);
+        toDeleteOrEditName = stackNameList.get(position);
         DeleteDialog dialog = new DeleteDialog();
         dialog.setConfirmMessage("Are you sure you want to delete: " +
-                toDeleteName + "? All its contents will be deleted.");
+                toDeleteOrEditName + "?");
         dialog.show(getSupportFragmentManager(), "DeleteStackDialog");
     }
 
     @Override
     public void onDeleteDialogPositiveClick(DialogFragment dialog) {
-        dbHelper.deleteStack(stackIdList.get(toDeleteIndex));
+        dbHelper.deleteStack(toDeleteOrEditId);
         updated();
-        makeToast("Deleted: " + toDeleteName);
+        makeToast("Deleted: " + toDeleteOrEditName);
+    }
+
+    @Override
+    public Type getType(){
+        return dialogType;
+    }
+
+    @Override
+    public String getNameToEdit() {
+        return toDeleteOrEditName;
     }
 
     private void updated() {

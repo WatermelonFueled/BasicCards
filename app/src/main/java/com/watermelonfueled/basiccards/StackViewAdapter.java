@@ -1,11 +1,11 @@
 package com.watermelonfueled.basiccards;
 
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckedTextView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -20,22 +20,34 @@ public class StackViewAdapter extends RecyclerView.Adapter<StackViewAdapter.Stac
     }
 
     private ArrayList<String> stackNameList;
+    private ArrayList<Boolean> substackSelectedList;
+    int layout;
+    int textViewId;
 
-    public StackViewAdapter(ListItemClickListener listener, ArrayList<String> stackName) {
+    public StackViewAdapter(ListItemClickListener listener, ArrayList<String> stackName, int layout) {
         onClickListener = listener;
         stackNameList = stackName;
+        this.layout = layout;
+        if (isSubstackActivity()) {
+            textViewId = R.id.checkedTextView;
+        } else {
+            textViewId = R.id.stack_textView;
+        }
     }
 
     @Override
     public StackViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
         View view = LayoutInflater.from(viewGroup.getContext()).inflate(
-                R.layout.stack_view, viewGroup, false );
+                layout, viewGroup, false );
         return new StackViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(StackViewHolder holder, int position) {
         holder.stackTextView.setText(stackNameList.get(position));
+        if (isSubstackActivity()) {
+            ((CheckedTextView)holder.stackTextView).setChecked(substackSelectedList.get(position));
+        }
     }
 
     @Override
@@ -48,12 +60,13 @@ public class StackViewAdapter extends RecyclerView.Adapter<StackViewAdapter.Stac
                         View.OnLongClickListener,
                         View.OnFocusChangeListener {
         TextView stackTextView;
-        Button deleteButton;
+        Button deleteButton, editButton;
 
         public StackViewHolder(View itemView) {
             super(itemView);
-            stackTextView = (TextView) itemView.findViewById(R.id.stack_textView);
+            stackTextView = (TextView) itemView.findViewById(textViewId);
             deleteButton = (Button) itemView.findViewById(R.id.delete_button);
+            editButton = (Button) itemView.findViewById(R.id.edit_button);
             itemView.setOnClickListener(this);
             itemView.setOnLongClickListener(this);
             itemView.setOnFocusChangeListener(this);
@@ -64,16 +77,22 @@ public class StackViewAdapter extends RecyclerView.Adapter<StackViewAdapter.Stac
             view.setFocusableInTouchMode(true);
             view.requestFocus();
             view.setFocusableInTouchMode(false);
+
             deleteButton.setVisibility(View.GONE);
+            editButton.setVisibility(View.GONE);
 
             int clickedPosition = getAdapterPosition();
             onClickListener.onListItemClick(clickedPosition);
+            if (isSubstackActivity()) {
+                ((CheckedTextView)stackTextView).toggle();
+            }
         }
 
         @Override
         public boolean onLongClick(View view) {
             int clickedPosition = getAdapterPosition();
             deleteButton.setTag(clickedPosition);
+            editButton.setTag(clickedPosition);
             view.setFocusableInTouchMode(true);
             view.requestFocus();
             return true;
@@ -83,8 +102,10 @@ public class StackViewAdapter extends RecyclerView.Adapter<StackViewAdapter.Stac
         public void onFocusChange(View v, boolean hasFocus) {
             if (hasFocus) {
                 deleteButton.setVisibility(View.VISIBLE);
+                editButton.setVisibility(View.VISIBLE);
             } else {
                 deleteButton.setVisibility(View.GONE);
+                editButton.setVisibility(View.GONE);
                 v.setFocusableInTouchMode(false);
             }
         }
@@ -94,4 +115,10 @@ public class StackViewAdapter extends RecyclerView.Adapter<StackViewAdapter.Stac
         stackNameList = updatedStackNameList;
         this.notifyDataSetChanged();
     }
+
+    //substackactivity specific methods
+    private boolean isSubstackActivity() {
+        return layout == R.layout.substack_view;
+    }
+    public void setSubstackSelectedList(ArrayList list) { substackSelectedList = list; }
 }

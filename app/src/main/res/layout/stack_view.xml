@@ -19,5 +19,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:onClick="deleteButtonOnClick"/>
+    <Button
+        android:id="@+id/edit_button"
+        android:text="EDIT"
+        android:visibility="gone"
+        android:layout_gravity="center_vertical|right"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="editButtonOnClick" />
 
 </LinearLayout>

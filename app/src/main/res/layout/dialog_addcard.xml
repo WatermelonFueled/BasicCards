@@ -42,6 +42,14 @@
         android:layout_below="@+id/substackText"
         android:layout_toRightOf="@+id/takePhotoButton"
         />
+    <Button
+        android:id="@+id/removeImageButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+        android:layout_toRightOf="@id/thumbnail"
+        android:text="X"
+        android:clickable="false"/>
     <EditText
         android:id="@+id/inputQuestion"
         android:layout_width="match_parent"

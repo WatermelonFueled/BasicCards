@@ -19,12 +19,6 @@
             android:layout_height="wrap_content"
             android:onClick="addSubstackOnClick"/>
         <Button
-            android:id="@+id/add_card_button"
-            android:text="Add card"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="addCardOnClick"/>
-        <Button
             android:id="@+id/card_list_button"
             android:text="List"
             android:layout_width="wrap_content"

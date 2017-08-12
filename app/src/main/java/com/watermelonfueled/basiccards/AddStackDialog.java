@@ -18,6 +18,9 @@ public class AddStackDialog extends DialogFragment{
 
     public interface AddStackDialogListener{
         void onAddStackDialogPositiveClick(DialogFragment dialog, String stackName);
+        enum Type{CREATE,EDIT}
+        Type getType();
+        String getNameToEdit();
     }
 
     private AddStackDialogListener listener;
@@ -34,11 +37,28 @@ public class AddStackDialog extends DialogFragment{
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
+
+
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
         final View dialogView = inflater.inflate(R.layout.dialog_addstack,null);
+
+        String positiveButtonText;
+        switch (listener.getType()) {
+            case CREATE:
+                positiveButtonText = "Create";
+                break;
+            case EDIT:
+                positiveButtonText = "Make edit";
+                EditText textbox = (EditText) dialogView.findViewById(R.id.stackname);
+                textbox.setText(listener.getNameToEdit());
+                break;
+            default:
+                positiveButtonText = "";
+        }
+
         builder.setView(dialogView)
-                .setPositiveButton("Create", new DialogInterface.OnClickListener() {
+                .setPositiveButton(positiveButtonText, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         EditText stackNameInput = (EditText) dialogView.findViewById(R.id.stackname);

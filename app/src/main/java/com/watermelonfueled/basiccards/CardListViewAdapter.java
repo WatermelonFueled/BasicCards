@@ -2,6 +2,7 @@ package com.watermelonfueled.basiccards;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.util.SparseArray;
@@ -38,29 +39,43 @@ public class CardListViewAdapter extends RecyclerView.Adapter<CardListViewAdapte
         this.cardBackList = cardBackList;
         this.cardImageList = cardImageList;
         this.context = context;
+        targetW = ImageHelper.getScreenWidthPx(context);
+        targetH = ImageHelper.getPixelsFromDp(context,200);
+        Log.d(TAG, "target dimen WxH: " + targetW + " x " + targetH);
     }
 
     @Override
     public CardListViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
         View view = LayoutInflater.from(viewGroup.getContext()).inflate(
                 R.layout.card_view, viewGroup, false );
-        view.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
-  //      targetW = view.getMeasuredWidth();
-//        targetH = view.getMeasuredHeight();
-        targetW = ImageHelper.getScreenWidthPx(context);
-        targetH = ImageHelper.getPixelsFromDp(context,200);
-        Log.d(TAG, "target dimen WxH: " + targetW + " x " + targetH);
+//        view.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
         return new CardListViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(CardListViewHolder holder, int position){
+        holder.imagePath = cardImageList.valueAt(position);
+        new GetImageAsyncTask().execute(holder);
         holder.front.setText(cardFrontList.get(position));
         holder.back.setText(cardBackList.get(position));
-        String path = cardImageList.valueAt(position);
-        if (path != null && !path.equalsIgnoreCase("")) {
-            Bitmap image = ImageHelper.loadImage(path, targetW, targetH);
-            holder.image.setImageBitmap(image);
+
+    }
+
+    private class GetImageAsyncTask extends AsyncTask<CardListViewHolder, Void, Bitmap> {
+        CardListViewHolder holder;
+        protected Bitmap doInBackground(CardListViewHolder... holders){
+            holder = holders[0];
+            if (holder.imagePath != null && !holder.imagePath.equals("")) {
+                return ImageHelper.loadImage(holder.imagePath, targetW, targetH);
+            } else {
+                return null;
+            }
+        }
+
+        protected void onPostExecute(Bitmap result){
+            if (result != null) {
+                holder.image.setImageBitmap(result);
+            }
         }
 
     }
@@ -76,7 +91,8 @@ public class CardListViewAdapter extends RecyclerView.Adapter<CardListViewAdapte
         ImageView image;
         ViewFlipper flipper;
         boolean frontShowing;
-        Button deleteButton;
+        Button deleteButton, editButton;
+        String imagePath;
 
         public CardListViewHolder(View itemView) {
             super(itemView);
@@ -86,6 +102,7 @@ public class CardListViewAdapter extends RecyclerView.Adapter<CardListViewAdapte
             image = (ImageView) itemView.findViewById(R.id.image);
             flipper = (ViewFlipper) itemView.findViewById(R.id.view_flipper);
             deleteButton = (Button) itemView.findViewById(R.id.delete_button);
+            editButton = (Button) itemView.findViewById(R.id.edit_button);
             itemView.setOnClickListener(this);
             itemView.setOnLongClickListener(this);
             itemView.setOnFocusChangeListener(this);
@@ -98,6 +115,7 @@ public class CardListViewAdapter extends RecyclerView.Adapter<CardListViewAdapte
             view.setFocusableInTouchMode(true);
             view.requestFocus();
             deleteButton.setVisibility(View.GONE);
+            editButton.setVisibility(View.GONE);
             if (frontShowing) {
 
                 flipper.setInAnimation(view.getContext(), R.anim.card_flip_bottom_in);
@@ -113,6 +131,7 @@ public class CardListViewAdapter extends RecyclerView.Adapter<CardListViewAdapte
         public boolean onLongClick(View view) {
             int clickedPosition = getAdapterPosition();
             deleteButton.setTag(clickedPosition);
+            editButton.setTag(clickedPosition);
             view.setFocusableInTouchMode(true);
             view.requestFocus();
             return true;
@@ -122,8 +141,10 @@ public class CardListViewAdapter extends RecyclerView.Adapter<CardListViewAdapte
         public void onFocusChange(View view, boolean hasFocus) {
             if (hasFocus) {
                 deleteButton.setVisibility(View.VISIBLE);
+                editButton.setVisibility(View.VISIBLE);
             } else {
                 deleteButton.setVisibility(View.GONE);
+                editButton.setVisibility(View.GONE);
                 view.setFocusableInTouchMode(false);
             }
         }
