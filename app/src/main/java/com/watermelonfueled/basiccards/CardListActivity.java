@@ -11,6 +11,9 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 
 import java.io.File;
@@ -135,6 +138,28 @@ public class CardListActivity extends AppCompatActivity
         cursor.close();
     }
 
+    // ACTION BAR //
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.cardlistmenu, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_add_card:
+                editCardMode = false;
+                addCardDialog =  new AddCardDialog();
+                addCardDialog.setSubstackNames(substackNames);
+                addCardDialog.show(getSupportFragmentManager(), "AddCardDialog");
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
     @Override
     public void onListItemClick(int clickedItemIndex) {
 
@@ -143,13 +168,6 @@ public class CardListActivity extends AppCompatActivity
     // ADD/EDIT CARD //
     private AddCardDialog addCardDialog;
     private Bundle addCardDialogBundle;
-
-    public void addCardButtonOnClick(View button) {
-        editCardMode = false;
-        addCardDialog =  new AddCardDialog();
-        addCardDialog.setSubstackNames(substackNames);
-        addCardDialog.show(getSupportFragmentManager(), "AddCardDialog");
-    }
 
     public void editButtonOnClick(View button) {
         editCardMode = true;

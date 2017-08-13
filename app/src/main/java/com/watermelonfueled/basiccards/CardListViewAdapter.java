@@ -9,7 +9,7 @@ import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.ViewFlipper;
@@ -75,6 +75,9 @@ public class CardListViewAdapter extends RecyclerView.Adapter<CardListViewAdapte
         protected void onPostExecute(Bitmap result){
             if (result != null) {
                 holder.image.setImageBitmap(result);
+            } else {
+                holder.image.setImageDrawable(null);
+                //holder.image.setImageResource(android.R.color.transparent);
             }
         }
 
@@ -91,7 +94,7 @@ public class CardListViewAdapter extends RecyclerView.Adapter<CardListViewAdapte
         ImageView image;
         ViewFlipper flipper;
         boolean frontShowing;
-        Button deleteButton, editButton;
+        ImageButton deleteButton, editButton;
         String imagePath;
 
         public CardListViewHolder(View itemView) {
@@ -101,8 +104,8 @@ public class CardListViewAdapter extends RecyclerView.Adapter<CardListViewAdapte
             back = (TextView) itemView.findViewById(R.id.text_back);
             image = (ImageView) itemView.findViewById(R.id.image);
             flipper = (ViewFlipper) itemView.findViewById(R.id.view_flipper);
-            deleteButton = (Button) itemView.findViewById(R.id.delete_button);
-            editButton = (Button) itemView.findViewById(R.id.edit_button);
+            deleteButton = (ImageButton) itemView.findViewById(R.id.delete_button);
+            editButton = (ImageButton) itemView.findViewById(R.id.edit_button);
             itemView.setOnClickListener(this);
             itemView.setOnLongClickListener(this);
             itemView.setOnFocusChangeListener(this);

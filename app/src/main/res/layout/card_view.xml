@@ -1,21 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="200dp"
-    android:layout_marginTop="6dp"
-    android:layout_marginLeft="6dp"
-    android:layout_marginRight="6dp">
+    android:layout_height="@dimen/card_list_item_height"
+    android:layout_marginTop="@dimen/card_list_item_margin"
+    android:layout_marginLeft="@dimen/card_list_item_margin"
+    android:layout_marginRight="@dimen/card_list_item_margin">
     <ViewFlipper
         android:id="@+id/view_flipper"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="bottom"
-        android:layout_weight="1.0">
+        android:gravity="bottom">
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/colorPrimary">
+            android:background="@color/stackItemBackground">
             <ImageView
                 android:id="@+id/image"
                 android:layout_width="match_parent"
@@ -23,31 +21,39 @@
                 android:scaleType="centerCrop"/>
             <TextView
                 android:id="@+id/text_front"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical|start"
-                android:textSize="42sp" />
+                android:layout_alignParentBottom="true"
+                android:padding="@dimen/card_list_item_text_padding"
+                android:textSize="40dp" />
         </RelativeLayout>
         <TextView
             android:id="@+id/text_back"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_gravity="center_vertical|start"
-            android:textSize="42sp"
-            android:background="@color/colorPrimaryDark"/>
+            android:layout_gravity="center"
+            android:padding="@dimen/card_list_item_text_padding"
+            android:background="@color/backgroundGrey"
+            android:textSize="40dp"/>
     </ViewFlipper>
-    <Button
-        android:id="@+id/delete_button"
-        android:text="DEL"
-        android:visibility="gone"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:onClick="deleteButtonOnClick"/>
-    <Button
+    <ImageButton
         android:id="@+id/edit_button"
-        android:text="EDIT"
+        android:src="@mipmap/ic_mode_edit_white_24dp"
         android:visibility="gone"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="@dimen/card_list_item_button_width"
+        android:layout_height="@dimen/card_list_item_height_half"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:background="@color/backgroundGrey"
         android:onClick="editButtonOnClick" />
-</LinearLayout>
+    <ImageButton
+        android:id="@+id/delete_button"
+        android:src="@mipmap/ic_delete_white_24dp"
+        android:visibility="gone"
+        android:layout_width="@dimen/card_list_item_button_width"
+        android:layout_height="@dimen/card_list_item_height_half"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:background="@color/deleteRedMuted"
+        android:onClick="deleteButtonOnClick"/>
+</RelativeLayout>

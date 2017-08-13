@@ -4,8 +4,8 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.CheckedTextView;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -60,13 +60,13 @@ public class StackViewAdapter extends RecyclerView.Adapter<StackViewAdapter.Stac
                         View.OnLongClickListener,
                         View.OnFocusChangeListener {
         TextView stackTextView;
-        Button deleteButton, editButton;
+        ImageButton deleteButton, editButton;
 
         public StackViewHolder(View itemView) {
             super(itemView);
             stackTextView = (TextView) itemView.findViewById(textViewId);
-            deleteButton = (Button) itemView.findViewById(R.id.delete_button);
-            editButton = (Button) itemView.findViewById(R.id.edit_button);
+            deleteButton = (ImageButton) itemView.findViewById(R.id.delete_button);
+            editButton = (ImageButton) itemView.findViewById(R.id.edit_button);
             itemView.setOnClickListener(this);
             itemView.setOnLongClickListener(this);
             itemView.setOnFocusChangeListener(this);

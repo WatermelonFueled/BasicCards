@@ -7,6 +7,9 @@ import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
@@ -60,18 +63,33 @@ public class MainActivity extends AppCompatActivity
         cursor.close();
     }
 
+    // ACTION BAR //
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.stackmenu, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_add_stack:
+                dialogType = Type.CREATE;
+                DialogFragment dialog = new AddStackDialog();
+                dialog.show(getSupportFragmentManager(), "AddStackDialog");
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
     @Override
     public void onListItemClick(int clickedItemIndex) {
         Intent intent = new Intent(this, SubstackActivity.class);
         intent.putExtra(StackEntry._ID, stackIdList.get(clickedItemIndex));
         intent.putExtra(StackEntry.COLUMN_NAME, stackNameList.get(clickedItemIndex));
         startActivity(intent);
-    }
-
-    public void addStackOnClick(View button){
-        dialogType = Type.CREATE;
-        DialogFragment dialog = new AddStackDialog();
-        dialog.show(getSupportFragmentManager(), "AddStackDialog");
     }
 
     @Override

@@ -9,8 +9,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
-import android.widget.CheckBox;
 
 import java.util.ArrayList;
 
@@ -94,8 +95,31 @@ public class SubstackActivity extends AppCompatActivity
         cursor.close();
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.substackmenu, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_add_substack:
+                addSubstackOnClick();
+                return true;
+            case R.id.menu_list_cards:
+                showCardListOnClick();
+                return true;
+            case R.id.menu_start_test:
+                startTestOnClick();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
     // ADD AND EDIT SUBSTACK //
-    public void addSubstackOnClick(View button) {
+    public void addSubstackOnClick() {
         dialogType = Type.CREATE;
         DialogFragment dialog = new AddStackDialog();
         dialog.show(getSupportFragmentManager(), "AddSubstackDialog");
@@ -106,6 +130,7 @@ public class SubstackActivity extends AppCompatActivity
         switch (getType()) {
             case CREATE:
                 dbHelper.addSubstack(substackName,stackId);
+                substackSelectedList.add(false);
                 break;
             case EDIT:
                 if (substackName.equals(toDeleteOrEditName)) {
@@ -159,7 +184,7 @@ public class SubstackActivity extends AppCompatActivity
         Log.i("SUBSTACKACTIVITY", "set index: " + clickedItemIndex + " to: " + substackSelectedList.get(clickedItemIndex));
     }
 
-    public void showCardListOnClick(View button) {
+    public void showCardListOnClick() {
         Intent intent = new Intent(this, CardListActivity.class);
 //        String[] idArray = selectedSubstackArray(substackIdList);
 //        if (idArray.length <= 0) { return; }
@@ -174,11 +199,11 @@ public class SubstackActivity extends AppCompatActivity
         startActivity(intent);
     }
 
-    public void startTestOnClick(View button) {
+    public void startTestOnClick() {
         String[] arr = selectedSubstackArray(substackIdList);
         if (arr.length <= 0) { return; }
-
-        boolean testInverse = ((CheckBox) findViewById(R.id.inverse_checkbox)).isChecked();
+        //TODO re-implement inverse test or remove.
+        boolean testInverse = false; //((CheckBox) findViewById(R.id.inverse_checkbox)).isChecked();
         Intent intent = new Intent(this, TestActivity.class);
         intent.putExtra(TestActivity.SELECTED_SUBSTACKS, arr);
         intent.putExtra(TestActivity.INVERSE, testInverse);

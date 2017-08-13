@@ -8,36 +8,10 @@
     android:focusableInTouchMode="true"
     android:clickable="true"
     tools:context="com.watermelonfueled.basiccards.SubstackActivity">
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <Button
-            android:id="@+id/add_substack_button"
-            android:text="New Substack"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="addSubstackOnClick"/>
-        <Button
-            android:id="@+id/card_list_button"
-            android:text="List"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="showCardListOnClick"/>
-        <Button
-            android:id="@+id/test_button"
-            android:text="Test"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="startTestOnClick"/>
-        <CheckBox
-            android:id="@+id/inverse_checkbox"
-            android:text="Inverse"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-    </LinearLayout>
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rv_list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        android:layout_marginBottom="@dimen/stack_list_item_padding"
+        android:background="@color/backgroundGreyLite"/>
 </LinearLayout>

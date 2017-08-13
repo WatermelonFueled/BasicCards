@@ -8,15 +8,10 @@
     android:focusableInTouchMode="true"
     android:clickable="true"
     tools:context="com.watermelonfueled.basiccards.MainActivity">
-    <Button
-        android:id="@+id/add_stack_button"
-        android:text="New Stack"
-        android:layout_gravity="right"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:onClick="addStackOnClick"/>
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rv_list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:layout_marginBottom="@dimen/stack_list_item_padding"
+        android:background="@color/backgroundGreyLite"/>
 </LinearLayout>
