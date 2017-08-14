@@ -10,8 +10,8 @@
         android:id="@+id/rv_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="@dimen/card_list_item_margin"
+        android:paddingBottom="@dimen/card_list_item_margin"
         android:background="@color/backgroundGreyLite"
-        />
+        android:clipToPadding="false"/>
 
 </LinearLayout>

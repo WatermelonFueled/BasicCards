@@ -48,7 +48,6 @@ public class CardListViewAdapter extends RecyclerView.Adapter<CardListViewAdapte
     public CardListViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
         View view = LayoutInflater.from(viewGroup.getContext()).inflate(
                 R.layout.card_view, viewGroup, false );
-//        view.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
         return new CardListViewHolder(view);
     }
 
@@ -57,7 +56,7 @@ public class CardListViewAdapter extends RecyclerView.Adapter<CardListViewAdapte
         holder.imagePath = cardImageList.valueAt(position);
         new GetImageAsyncTask().execute(holder);
         holder.front.setText(cardFrontList.get(position));
-        holder.back.setText(cardBackList.get(position));
+        holder.back.setText(cardBackList.get(position));;
 
     }
 

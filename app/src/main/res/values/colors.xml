@@ -3,9 +3,16 @@
     <color name="colorPrimary">#3f51b5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
+
     <color name="stackItemBackground">#FFF</color>
     <color name="backgroundGrey">#9e9e9e</color>
     <color name="backgroundGreyLite">#eeeeee</color>
+    <color name="background_grey_translucent">#8ca5a5a5</color>
+
     <color name="confirmGreenMuted">#8ae467</color>
     <color name="deleteRedMuted">#df6060</color>
+    <color name="editGrey">#757575</color>
+
+    <color name="card_text_front">#FFF</color>
+    <color name="card_text_shadow">#222</color>
 </resources>

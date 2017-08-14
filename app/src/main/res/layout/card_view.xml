@@ -13,7 +13,9 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/stackItemBackground">
+            android:background="@drawable/backgroundpattern1repeat"
+            android:backgroundTint="@color/colorPrimary"
+            android:backgroundTintMode="multiply">
             <ImageView
                 android:id="@+id/image"
                 android:layout_width="match_parent"
@@ -21,11 +23,15 @@
                 android:scaleType="centerCrop"/>
             <TextView
                 android:id="@+id/text_front"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/card_list_item_text_box_height"
                 android:layout_alignParentBottom="true"
+                android:gravity="center_vertical"
                 android:padding="@dimen/card_list_item_text_padding"
-                android:textSize="40dp" />
+                android:includeFontPadding="false"
+                android:textSize="@dimen/card_list_item_text_size"
+                android:textColor="@color/card_text_front"
+                android:background="@color/background_grey_translucent" />
         </RelativeLayout>
         <TextView
             android:id="@+id/text_back"
@@ -33,27 +39,10 @@
             android:layout_height="match_parent"
             android:layout_gravity="center"
             android:padding="@dimen/card_list_item_text_padding"
+            android:includeFontPadding="false"
             android:background="@color/backgroundGrey"
-            android:textSize="40dp"/>
+            android:textSize="@dimen/card_list_item_text_size"
+            android:textColor="@color/card_text_front" />
     </ViewFlipper>
-    <ImageButton
-        android:id="@+id/edit_button"
-        android:src="@mipmap/ic_mode_edit_white_24dp"
-        android:visibility="gone"
-        android:layout_width="@dimen/card_list_item_button_width"
-        android:layout_height="@dimen/card_list_item_height_half"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:background="@color/backgroundGrey"
-        android:onClick="editButtonOnClick" />
-    <ImageButton
-        android:id="@+id/delete_button"
-        android:src="@mipmap/ic_delete_white_24dp"
-        android:visibility="gone"
-        android:layout_width="@dimen/card_list_item_button_width"
-        android:layout_height="@dimen/card_list_item_height_half"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentBottom="true"
-        android:background="@color/deleteRedMuted"
-        android:onClick="deleteButtonOnClick"/>
+    <include layout="@layout/edit_delete_buttons"/>
 </RelativeLayout>

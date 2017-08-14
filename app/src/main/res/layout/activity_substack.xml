@@ -12,6 +12,7 @@
         android:id="@+id/rv_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="@dimen/stack_list_item_padding"
-        android:background="@color/backgroundGreyLite"/>
+        android:paddingBottom="@dimen/stack_list_item_padding"
+        android:background="@color/backgroundGreyLite"
+        android:clipToPadding="false"/>
 </LinearLayout>
