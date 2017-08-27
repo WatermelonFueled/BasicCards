@@ -74,17 +74,16 @@ public class CardListActivity extends AppCompatActivity
         loadCards();
 
         setView();
-
-
     }
 
     @Override
     protected void onResume() {
-        if (addCardDialog != null) {
+        super.onResume();
+        if (addCardDialog != null && !addCardDialog.isAdded()) {
             addCardDialog.show(getSupportFragmentManager(), "AddCardDialog");
         }
-        super.onResume();
     }
+
 
     @Override
     public void onSaveInstanceState(Bundle outState) {

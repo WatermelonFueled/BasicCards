@@ -3,4 +3,15 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string-array name="test_results_blurb_array">
+        <item>Lower than random chance would predict. Don\'t buy a lottery ticket today.</item>
+        <item>The important thing is that you tried.</item>
+        <item>You would make a great politician with polls like this!</item>
+        <item>Well, it\'s better than I expected of you.</item>
+        <item>What does it feel like? Being average?</item>
+        <item>Good job! You did as well as my goldfish!</item>
+        <item>Wow! What a high score! What are you trying to compensate for?</item>
+        <item>A perfect score? I was just going easy on you.</item>
+    </string-array>
 </resources>

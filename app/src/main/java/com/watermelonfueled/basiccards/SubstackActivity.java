@@ -26,7 +26,7 @@ public class SubstackActivity extends AppCompatActivity
     private final String TAG = "SubstackActivity";
 
     private DbHelper dbHelper;
-    private int stackId, toDeleteOrEditId, addCardToSubstackIndex = 0 ;
+    private int stackId, toDeleteOrEditId;
     private StackViewAdapter adapter;
     private ArrayList<String> substackNameList;
     private ArrayList<Integer> substackIdList;
@@ -34,8 +34,7 @@ public class SubstackActivity extends AppCompatActivity
     private String toDeleteOrEditName;
     Type dialogType;
 
-    private final String    STACK_ID_KEY = "stackidkey",
-                            ADD_CARD_SUBSTACK_INDEX_KEY = "addcardsubstackindexkey";
+    private final String STACK_ID_KEY = "stackidkey";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,7 +76,7 @@ public class SubstackActivity extends AppCompatActivity
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         rv.setLayoutManager(layoutManager);
         rv.setHasFixedSize(true);
-        adapter = new StackViewAdapter(this, substackNameList, R.layout.substack_view);
+        adapter = new StackViewAdapter(this, substackNameList, R.layout.substack_view, this);
         adapter.setSubstackSelectedList(substackSelectedList);
         rv.setAdapter(adapter);
     }
@@ -185,13 +184,9 @@ public class SubstackActivity extends AppCompatActivity
     }
 
     public void showCardListOnClick() {
-        Intent intent = new Intent(this, CardListActivity.class);
-//        String[] idArray = selectedSubstackArray(substackIdList);
-//        if (idArray.length <= 0) { return; }
-//        String[] nameArray = selectedSubstackArray(substackNameList);
-//        if (nameArray.length <= 0) { return; }
         ArrayList selectedSubstacks = selectedSubstackArrayList(substackIdList);
         if (selectedSubstacks.isEmpty()) { return; }
+        Intent intent = new Intent(this, CardListActivity.class);
         intent.putIntegerArrayListExtra(CardListActivity.SELECTED_SUBSTACKS, selectedSubstacks);
         intent.putStringArrayListExtra(CardListActivity.SELECTED_SUBSTACK_NAMES, selectedSubstackArrayList(substackNameList));
         intent.putIntegerArrayListExtra(CardListActivity.ALL_SUBSTACKS, substackIdList);
@@ -200,26 +195,15 @@ public class SubstackActivity extends AppCompatActivity
     }
 
     public void startTestOnClick() {
-        String[] arr = selectedSubstackArray(substackIdList);
-        if (arr.length <= 0) { return; }
+        ArrayList selectedSubstacks = selectedSubstackArrayList(substackIdList);
+        if (selectedSubstacks.isEmpty()) { return; }
         //TODO re-implement inverse test or remove.
         boolean testInverse = false; //((CheckBox) findViewById(R.id.inverse_checkbox)).isChecked();
         Intent intent = new Intent(this, TestActivity.class);
-        intent.putExtra(TestActivity.SELECTED_SUBSTACKS, arr);
+        intent.putIntegerArrayListExtra(TestActivity.SELECTED_SUBSTACKS, selectedSubstacks);
+        intent.putStringArrayListExtra(TestActivity.SELECTED_SUBSTACK_NAMES, selectedSubstackArrayList(substackNameList));
         intent.putExtra(TestActivity.INVERSE, testInverse);
         startActivity(intent);
-    }
-
-    private String[] selectedSubstackArray(ArrayList list) {
-        ArrayList<String> selectedSubstackIds = new ArrayList<>();
-        for (int i = 0; i < substackIdList.size(); i++) {
-            if (substackSelectedList.get(i)){
-                selectedSubstackIds.add(list.get(i).toString());
-            }
-        }
-        String[] arr = new String[selectedSubstackIds.size()];
-        arr = selectedSubstackIds.toArray(arr);
-        return arr;
     }
 
     private ArrayList selectedSubstackArrayList(ArrayList list) {

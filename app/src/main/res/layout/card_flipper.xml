@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+    <ViewFlipper
+        android:id="@+id/view_flipper"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="bottom">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/backgroundpattern1repeat"
+            android:backgroundTint="@color/colorPrimary"
+            android:backgroundTintMode="multiply">
+            <ImageView
+                android:id="@+id/image"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"/>
+            <TextView
+                android:id="@+id/text_front"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/card_list_item_text_box_height"
+                android:layout_alignParentBottom="true"
+                android:gravity="center_vertical"
+                android:padding="@dimen/card_list_item_text_padding"
+                android:includeFontPadding="false"
+                android:textSize="@dimen/card_list_item_text_size"
+                android:textColor="@color/card_text_front"
+                android:background="@color/background_grey_translucent" />
+        </RelativeLayout>
+        <TextView
+            android:id="@+id/text_back"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:padding="@dimen/card_list_item_text_padding"
+            android:includeFontPadding="false"
+            android:background="@color/backgroundGrey"
+            android:textSize="@dimen/card_list_item_text_size"
+            android:textColor="@color/card_text_front" />
+    </ViewFlipper>
+</merge>

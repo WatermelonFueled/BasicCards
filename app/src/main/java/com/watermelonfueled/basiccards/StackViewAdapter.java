@@ -1,9 +1,11 @@
 package com.watermelonfueled.basiccards;
 
+import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AnimationUtils;
 import android.widget.CheckedTextView;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -21,12 +23,14 @@ public class StackViewAdapter extends RecyclerView.Adapter<StackViewAdapter.Stac
 
     private ArrayList<String> stackNameList;
     private ArrayList<Boolean> substackSelectedList;
+    private Context context;
     int layout;
     int textViewId;
 
-    public StackViewAdapter(ListItemClickListener listener, ArrayList<String> stackName, int layout) {
+    public StackViewAdapter(ListItemClickListener listener, ArrayList<String> stackName, int layout, Context context) {
         onClickListener = listener;
         stackNameList = stackName;
+        this.context = context;
         this.layout = layout;
         if (isSubstackActivity()) {
             textViewId = R.id.checkedTextView;
@@ -102,9 +106,13 @@ public class StackViewAdapter extends RecyclerView.Adapter<StackViewAdapter.Stac
         public void onFocusChange(View v, boolean hasFocus) {
             if (hasFocus) {
                 deleteButton.setVisibility(View.VISIBLE);
+                deleteButton.startAnimation(AnimationUtils.loadAnimation(context,R.anim.button_slide_left_in));
                 editButton.setVisibility(View.VISIBLE);
+                editButton.startAnimation(AnimationUtils.loadAnimation(context,R.anim.button_slide_left_in));
             } else {
+                deleteButton.startAnimation(AnimationUtils.loadAnimation(context,R.anim.button_slide_right_out));
                 deleteButton.setVisibility(View.GONE);
+                editButton.startAnimation(AnimationUtils.loadAnimation(context,R.anim.button_slide_right_out));
                 editButton.setVisibility(View.GONE);
                 v.setFocusableInTouchMode(false);
             }

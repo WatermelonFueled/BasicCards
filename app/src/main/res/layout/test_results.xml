@@ -2,36 +2,63 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@color/backgroundGreyLite">
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_weight="7"
-        android:layout_height="0dp">
+        android:layout_height="0dp"
+        android:layout_weight="4"
+        android:layout_margin="@dimen/test_item_margin"
+        android:background="@color/test_button_background">
         <com.watermelonfueled.basiccards.ResultsPieChartView
             android:id="@+id/pie"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
+            android:layout_margin="@dimen/test_pie_chart_margin"
             android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"/>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Results"
             android:layout_alignParentTop="true"
-            android:layout_alignParentLeft="true"
-            android:textSize="75dp"/>
+            android:layout_alignParentBottom="true" />
         <TextView
-            android:id="@+id/score"
+            android:id="@+id/percentage_score"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_margin="@dimen/test_results_text_margin"
+            android:layout_alignParentTop="true"
             android:layout_alignParentRight="true"
-            android:layout_alignParentBottom="true"
-            android:textSize="120dp"/>
+            android:textSize="@dimen/test_results_text_big"/>
+        <TextView
+            android:id="@+id/fraction_score"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/test_results_text_margin"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:textSize="@dimen/test_results_text_medium" />
     </RelativeLayout>
+    <TextView
+        android:id="@+id/results_blurb"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginLeft="@dimen/test_item_margin"
+        android:layout_marginRight="@dimen/test_item_margin"
+        android:gravity="center"
+        android:background="@color/test_button_background"
+        android:textSize="@dimen/test_results_text_small"
+        android:textAlignment="center" />
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/rv_list"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="3"
+        android:paddingRight="@dimen/test_item_margin"
+        android:clipToPadding="false"
+        android:scrollbars="horizontal"/>
     <Button
         android:id="@+id/exit"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="2"
+        android:layout_weight="1"
+        android:background="@color/test_button_background"
         android:text="Exit"/>
 </LinearLayout>

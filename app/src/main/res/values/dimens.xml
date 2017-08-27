@@ -19,7 +19,15 @@
     and card_list_item_text_box_height-->
     <dimen name="edit_button_height">72dp</dimen>
 
+    <dimen name="dialog_margin">8dp</dimen>
+    <dimen name="dialog_margin_half">4dp</dimen>
+    <dimen name="dialog_line_height">48dp</dimen>
 
-    <dimen name="margin_normal">8dp</dimen>
-    <dimen name="margin_normal_half">4dp</dimen>
+    <dimen name="test_item_margin">8dp</dimen>
+    <dimen name="test_pie_chart_margin">8dp</dimen>
+    <dimen name="test_results_text_margin">6dp</dimen>
+    <dimen name="test_results_text_big">64dp</dimen>
+    <dimen name="test_results_text_medium">40dp</dimen>
+    <dimen name="test_results_text_small">18dp</dimen>
+    <dimen name="test_results_substack_width">96dp</dimen>
 </resources>

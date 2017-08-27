@@ -2,7 +2,6 @@ package com.watermelonfueled.basiccards;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.util.AttributeSet;
@@ -48,7 +47,7 @@ public class ResultsPieChartView extends View {
             float sweepAngle = values[i]/total*360;
             Log.d(TAG, "start angle: " + startAngle + " sweep angle: " + sweepAngle + " value: " + values[i]);
 
-            canvas.drawArc(bounds, startAngle, sweepAngle, true, getNextPaint(i));
+            canvas.drawArc(bounds, startAngle-90, sweepAngle, true, getNextPaint(i));
 
             startAngle += sweepAngle;
         }
@@ -63,21 +62,30 @@ public class ResultsPieChartView extends View {
         Paint paint = new Paint();
         paint.setStyle(Paint.Style.FILL);
         if (iteration % 2 == 0) {
-            paint.setColor(Color.BLUE);
+            paint.setColor(getResources().getColor(R.color.pie_chart_correct));
         } else {
-            paint.setColor(Color.DKGRAY);
+            paint.setColor(getResources().getColor(R.color.pie_chart_incorrect));
         }
-        paint.setAlpha(150);
+        paint.setAlpha(200);
         return paint;
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int minw = getPaddingLeft() + getPaddingRight() + getSuggestedMinimumWidth();
+        //width based
+        /*        int minw = getPaddingLeft() + getPaddingRight() + getSuggestedMinimumWidth();
         int w = resolveSizeAndState(minw, widthMeasureSpec, 1);
 
         int minh = MeasureSpec.getSize(w) + getPaddingBottom() + getPaddingTop();
-        int h = resolveSizeAndState(MeasureSpec.getSize(w), heightMeasureSpec, 0);
+        int h = resolveSizeAndState(MeasureSpec.getSize(w), heightMeasureSpec, 0);*/
+
+        //height based
+        int minh = getPaddingBottom() + getPaddingTop() + getSuggestedMinimumHeight();
+        int h = resolveSizeAndState(minh, heightMeasureSpec, 0);
+
+        int minw = getPaddingLeft() + getPaddingRight() + MeasureSpec.getSize(h);
+        int w = resolveSizeAndState(MeasureSpec.getSize(h), widthMeasureSpec, 1);
+
         setMeasuredDimension(w,h);
     }
 

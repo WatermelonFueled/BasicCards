@@ -9,6 +9,7 @@ import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -143,9 +144,13 @@ public class CardListViewAdapter extends RecyclerView.Adapter<CardListViewAdapte
         public void onFocusChange(View view, boolean hasFocus) {
             if (hasFocus) {
                 deleteButton.setVisibility(View.VISIBLE);
+                deleteButton.startAnimation(AnimationUtils.loadAnimation(context,R.anim.button_slide_left_in));
                 editButton.setVisibility(View.VISIBLE);
+                editButton.startAnimation(AnimationUtils.loadAnimation(context,R.anim.button_slide_left_in));
             } else {
+                deleteButton.startAnimation(AnimationUtils.loadAnimation(context,R.anim.button_slide_right_out));
                 deleteButton.setVisibility(View.GONE);
+                editButton.startAnimation(AnimationUtils.loadAnimation(context,R.anim.button_slide_right_out));
                 editButton.setVisibility(View.GONE);
                 view.setFocusableInTouchMode(false);
             }

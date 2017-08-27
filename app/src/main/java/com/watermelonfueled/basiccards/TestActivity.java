@@ -6,7 +6,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -14,7 +14,6 @@ import android.util.Log;
 import android.view.View;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Random;
 
@@ -22,16 +21,20 @@ import static com.watermelonfueled.basiccards.CardsContract.CardEntry;
 
 public class TestActivity extends AppCompatActivity {
 
-    public final static String SELECTED_SUBSTACKS = "SelectedSubstacks", TAG = "TESTACTIVITY", INVERSE = "inverse";
+    public final static String  SELECTED_SUBSTACKS = "SelectedSubstacks",
+                                SELECTED_SUBSTACK_NAMES = "SelectedSubstackNames",
+                                TAG = "TESTACTIVITY",
+                                INVERSE = "inverse";
     private final long SWIPE_DELAY = 1000;
     private NoSwipeViewPager pager;
-    private ArrayList<String> substackIdsArrayList;
+    private ArrayList<Integer> substackIdsArrayList, order;
+    private int[] substackCorrectCount, substackQuestionCount;
     private ArrayList<ArrayList<Integer>> positions;
     private String[][] cardData;
     private int question, answer, substackId = 2, image = 3; //cardData rows
-    private ArrayList<Integer> order;
     private boolean testInverse;
-    private int correctCount;
+    private int correctCount, position;
+    private ArrayList<String> substackNamesList;
     TestResultsFragment resultsFragment;
 
 
@@ -41,12 +44,52 @@ public class TestActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_test);
 
-        testInverse = getIntent().getBooleanExtra(INVERSE, false);
+        if (savedInstanceState != null) {
+            substackIdsArrayList = savedInstanceState.getIntegerArrayList("substackIdsArrayList");
+            substackQuestionCount = savedInstanceState.getIntArray("substackQuestionCount");
+            substackCorrectCount = savedInstanceState.getIntArray("substackCorrectCount");
+            cardData = (String[][]) savedInstanceState.getSerializable("cardData");
+            positions = (ArrayList) savedInstanceState.getSerializable("positions");
+            order = savedInstanceState.getIntegerArrayList("order");
+            correctCount = savedInstanceState.getInt("correctCount");
+            position = savedInstanceState.getInt("position");
+            substackNamesList = savedInstanceState.getStringArrayList("substackNamesList");
 
-        loadCards();
+        }else {
+            substackIdsArrayList = getIntent().getIntegerArrayListExtra(SELECTED_SUBSTACKS);
+            substackCorrectCount = new int[substackIdsArrayList.size()];
+            substackQuestionCount = new int[substackIdsArrayList.size()];
+            substackNamesList = getIntent().getStringArrayListExtra(SELECTED_SUBSTACK_NAMES);
+            testInverse = getIntent().getBooleanExtra(INVERSE, false);
+
+            if (testInverse) {
+                question = 1;
+                answer = 0;
+            } else {
+                question = 0;
+                answer = 1;
+            }
+
+            loadCards();
+            correctCount = 0;
+            position = 0;
+        }
+
         setView();
+    }
 
-        correctCount = 0;
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putIntegerArrayList("substackIdsArrayList", substackIdsArrayList);
+        outState.putIntArray("substackCorrectCount", substackCorrectCount);
+        outState.putIntArray("substackQuestionCount", substackQuestionCount);
+        outState.putSerializable("cardData", cardData);
+        outState.putSerializable("positions", positions);
+        outState.putIntegerArrayList("order", order);
+        outState.putInt("correctCount", correctCount);
+        outState.putInt("position", position);
+        outState.putStringArrayList("substackNamesList", substackNamesList);
+        super.onSaveInstanceState(outState);
     }
 
     private void setView() {
@@ -59,30 +102,25 @@ public class TestActivity extends AppCompatActivity {
             @Override
             public void onPageSelected(int position) {
                 if (position == cardData[0].length) {
-                    resultsFragment.setScore(getScore());
+                    resultsFragment.setScore(correctCount, cardData[0].length, substackCorrectCount, substackQuestionCount, substackNamesList);
                 }
             }
             @Override
             public void onPageScrollStateChanged(int state) {}
         });
+        pager.setCurrentItem(position);
     }
 
     private void loadCards() {
-        String[] substackIds = getIntent().getStringArrayExtra(SELECTED_SUBSTACKS);
-        substackIdsArrayList = new ArrayList<>(Arrays.asList(substackIds));
-        positions = new ArrayList<>(substackIds.length);
-        for (String substackId : substackIds) {
+        positions = new ArrayList<>(substackIdsArrayList.size());
+        String[] substackIdsStringArray = new String[substackIdsArrayList.size()];
+        for (int i = 0; i <  substackIdsArrayList.size(); i++) {
             positions.add(new ArrayList<Integer>());
+            substackIdsStringArray[i] = String.valueOf(substackIdsArrayList.get(i));
         }
-        Cursor cursor = DbHelper.getInstance(this).loadCardsTable(substackIds);
+        Cursor cursor = DbHelper.getInstance(this).loadCardsTable(substackIdsStringArray);
         order = new ArrayList<>(cursor.getCount());
         cardData = new String[4][cursor.getCount()];
-
-        if (testInverse) {
-            question = 1; answer = 0;
-        } else {
-            question = 0; answer = 1;
-        }
 
         for (int i = 0; i < cursor.getCount(); i++) {
             cursor.moveToNext();
@@ -90,15 +128,14 @@ public class TestActivity extends AppCompatActivity {
             cardData[answer][i] = cursor.getString(cursor.getColumnIndex(CardEntry.COLUMN_ANSWER));
             cardData[substackId][i] = cursor.getString(cursor.getColumnIndex(CardEntry.COLUMN_SUBSTACK));
             cardData[image][i] = cursor.getString(cursor.getColumnIndex(CardEntry.COLUMN_IMAGE));
-            positions.get(substackIdsArrayList.indexOf(cardData[2][i])).add(i);
+            positions.get(substackIdsArrayList.indexOf(Integer.valueOf(cardData[substackId][i]))).add(i);
             order.add(i);
         }
         Collections.shuffle(order);
         cursor.close();
     }
 
-    //TODO compare fragmentstatepageradapter vs fragmentpageradapter
-    private class TestCardPagerAdapter extends FragmentStatePagerAdapter
+    private class TestCardPagerAdapter extends FragmentPagerAdapter
             implements TestCardFragment.AnswerClickListener {
 
         TestActivity testActivity;
@@ -117,9 +154,10 @@ public class TestActivity extends AppCompatActivity {
             int orderPosition = order.get(position);
             String question = cardData[0][orderPosition];
             String correct = cardData[1][orderPosition];
+            int substackIdOfCard = Integer.parseInt(cardData[2][orderPosition]);
             String imagePath = cardData[3][orderPosition];
 
-            ArrayList<Integer> substackPositions = new ArrayList<>(positions.get(substackIdsArrayList.indexOf(cardData[2][orderPosition])));
+            ArrayList<Integer> substackPositions = new ArrayList<>(positions.get(substackIdsArrayList.indexOf(Integer.valueOf(cardData[substackId][orderPosition]))));
             Collections.shuffle(substackPositions);
             int optionCount = Math.min(4, substackPositions.size());
             substackPositions.remove((Integer)orderPosition);
@@ -135,7 +173,7 @@ public class TestActivity extends AppCompatActivity {
                     questionAnswers[i] = cardData[1][substackPositions.get(j)];
                 }
             }
-            return TestCardFragment.newInstance(this, correctPosition, imagePath, questionAnswers);
+            return TestCardFragment.newInstance(this, correctPosition, substackIdOfCard, imagePath, questionAnswers);
         }
 
         private final Handler handler = new Handler();
@@ -146,8 +184,14 @@ public class TestActivity extends AppCompatActivity {
             }
         };
 
-        public void onAnswerClick(boolean correct) {
-            if (correct) { correctCount++; }
+        public void onAnswerClick(boolean correct, int substackId) {
+            int substackPosition = substackIdsArrayList.indexOf(substackId);
+            if (correct) {
+                correctCount++;
+                substackCorrectCount[substackPosition]++;
+            }
+            position++;
+            substackQuestionCount[substackPosition]++;
             Log.i(TAG, "Correct count: "+correctCount);
             handler.postDelayed(runnable, SWIPE_DELAY);
         }

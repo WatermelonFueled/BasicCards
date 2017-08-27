@@ -2,12 +2,12 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="@dimen/margin_normal">
+    android:layout_margin="@dimen/dialog_margin">
     <TextView
         android:id="@+id/substackText"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/margin_normal"
+        android:layout_height="@dimen/dialog_line_height"
+        android:layout_margin="@dimen/dialog_margin"
         android:paddingLeft="4dp"
         android:layout_alignParentTop="true"
         android:textSize="20dp"
@@ -15,55 +15,58 @@
     <Spinner
         android:id="@+id/substackSpinner"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/margin_normal"
+        android:layout_height="@dimen/dialog_line_height"
+        android:layout_margin="@dimen/dialog_margin"
         android:layout_toRightOf="@+id/substackText">
     </Spinner>
-    <Button
+    <ImageButton
         android:id="@+id/addImageButton"
-        android:layout_width="wrap_content"
-        android:layout_height="60dp"
-        android:layout_marginLeft="@dimen/margin_normal"
+        android:layout_width="@dimen/dialog_line_height"
+        android:layout_height="@dimen/dialog_line_height"
+        android:layout_marginLeft="@dimen/dialog_margin"
         android:layout_below="@+id/substackText"
-        android:text="Add Image"/>
-    <Button
+        android:background="@color/transparent"
+        android:src="@mipmap/ic_photo_library_black_24dp"/>
+    <ImageButton
         android:id="@+id/takePhotoButton"
-        android:layout_width="wrap_content"
-        android:layout_height="60dp"
-        android:layout_marginLeft="@dimen/margin_normal"
+        android:layout_width="@dimen/dialog_line_height"
+        android:layout_height="@dimen/dialog_line_height"
+        android:layout_marginLeft="@dimen/dialog_margin"
         android:layout_below="@+id/substackText"
         android:layout_toRightOf="@+id/addImageButton"
-        android:text="Take Photo"/>
+        android:background="@color/transparent"
+        android:src="@mipmap/ic_photo_camera_black_24dp"/>
     <ImageView
         android:id="@+id/thumbnail"
-        android:layout_width="110dp"
-        android:layout_height="60dp"
-        android:layout_marginLeft="@dimen/margin_normal"
+        android:layout_width="80dp"
+        android:layout_height="@dimen/dialog_line_height"
+        android:layout_marginLeft="@dimen/dialog_margin"
         android:layout_below="@+id/substackText"
         android:layout_toRightOf="@+id/takePhotoButton"
         />
-    <Button
+    <ImageButton
         android:id="@+id/removeImageButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-
+        android:layout_below="@id/substackSpinner"
         android:layout_toRightOf="@id/thumbnail"
-        android:text="X"
+        android:background="@color/transparent"
+        android:src="@drawable/remove_image_button"
         android:clickable="false"/>
     <EditText
         android:id="@+id/inputQuestion"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/margin_normal"
+        android:layout_height="@dimen/dialog_line_height"
+        android:layout_margin="@dimen/dialog_margin"
         android:layout_below="@+id/addImageButton"
         android:hint="Front"/>
     <EditText
         android:id="@+id/inputAnswer"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/margin_normal"
-        android:layout_marginRight="@dimen/margin_normal"
-        android:layout_marginBottom="@dimen/margin_normal_half"
+        android:layout_height="@dimen/dialog_line_height"
+        android:layout_marginLeft="@dimen/dialog_margin"
+        android:layout_marginRight="@dimen/dialog_margin"
+        android:layout_marginBottom="@dimen/dialog_margin_half"
         android:layout_below="@+id/inputQuestion"
         android:hint="Back"/>
 

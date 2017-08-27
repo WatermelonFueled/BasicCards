@@ -48,7 +48,7 @@ public class MainActivity extends AppCompatActivity
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         rv.setLayoutManager(layoutManager);
         rv.setHasFixedSize(true);
-        adapter = new StackViewAdapter(this, stackNameList, R.layout.stack_view);
+        adapter = new StackViewAdapter(this, stackNameList, R.layout.stack_view, this);
         rv.setAdapter(adapter);
     }
 

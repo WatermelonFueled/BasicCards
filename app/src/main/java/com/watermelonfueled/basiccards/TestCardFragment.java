@@ -17,22 +17,25 @@ import android.widget.ViewFlipper;
 public class TestCardFragment extends Fragment implements View.OnClickListener{
     private AnswerClickListener answerClickListener;
     public interface AnswerClickListener {
-        void onAnswerClick(boolean correct);
+        void onAnswerClick(boolean correct, int substackId);
     }
 
     private boolean done = false;
-    private int correctId, correctPosition;
+    private int correctId, correctPosition, substackId;
     private String[] questionAnswers;
     private String imagePath;
     private ViewFlipper flipper;
 
-    public static TestCardFragment newInstance(AnswerClickListener listener, int correctPosition, String imagePath, String... questionAnswers) {
+    public static TestCardFragment newInstance(AnswerClickListener listener, int correctPosition,
+                                               int substackId, String imagePath,
+                                               String... questionAnswers) {
         TestCardFragment testCardFragment = new TestCardFragment();
         testCardFragment.answerClickListener = listener;
         Bundle args = new Bundle();
         args.putInt("correctPosition", correctPosition);
         args.putStringArray("questionAnswers", questionAnswers);
         args.putString("imagePath",imagePath);
+        args.putInt("substackId", substackId);
         testCardFragment.setArguments(args);
         return testCardFragment;
     }
@@ -43,6 +46,7 @@ public class TestCardFragment extends Fragment implements View.OnClickListener{
         setCorrect(getArguments().getInt("correctPosition"));
         setQuestionAnswers(getArguments().getStringArray("questionAnswers"));
         imagePath = getArguments().getString("imagePath");
+        substackId = getArguments().getInt("substackId");
     }
 
     private void setQuestionAnswers(String[] questionAnswers) {
@@ -95,7 +99,7 @@ public class TestCardFragment extends Fragment implements View.OnClickListener{
         if (imagePath != null && !imagePath.equalsIgnoreCase("")) {
             ((ImageView) view.findViewById(R.id.image)).setImageBitmap(ImageHelper.loadImage(imagePath,
                     ImageHelper.getScreenWidthPx(getContext()),
-                    ImageHelper.getPixelsFromDp(getContext(), 200)));
+                    ImageHelper.getPixelsFromDp(getContext(), R.dimen.card_list_item_height)));
         }
         return view;
     }
@@ -108,11 +112,11 @@ public class TestCardFragment extends Fragment implements View.OnClickListener{
         flipper.setOutAnimation(this.getContext(),R.anim.card_flip_top_out);
         flipper.showNext();
         if (selectedAnswer.getId() == correctId) {
-            selectedAnswer.setBackgroundColor(getResources().getColor(R.color.colorAccent));
-            answerClickListener.onAnswerClick(true);
+            selectedAnswer.setBackgroundColor(getResources().getColor(R.color.test_correct_color));
+            answerClickListener.onAnswerClick(true, substackId);
         } else {
-            selectedAnswer.setAlpha(0.5f);
-            answerClickListener.onAnswerClick(false);
+            selectedAnswer.setBackgroundColor(getResources().getColor(R.color.test_incorrect_color));
+            answerClickListener.onAnswerClick(false, substackId);
         }
     }
 

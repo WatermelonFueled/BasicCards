@@ -21,8 +21,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Spinner;
 
@@ -144,7 +144,7 @@ public class AddCardDialog extends DialogFragment implements AdapterView.OnItemS
         spinner.setOnItemSelectedListener(this);
         spinner.setSelection(selectedSubstackIndex);
 
-        Button addImageButton = (Button) dialogView.findViewById(R.id.addImageButton);
+        ImageButton addImageButton = (ImageButton) dialogView.findViewById(R.id.addImageButton);
         addImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -152,7 +152,7 @@ public class AddCardDialog extends DialogFragment implements AdapterView.OnItemS
             }
         });
 
-        Button takePhotoButton = (Button) dialogView.findViewById(R.id.takePhotoButton);
+        ImageButton takePhotoButton = (ImageButton) dialogView.findViewById(R.id.takePhotoButton);
         takePhotoButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -169,7 +169,7 @@ public class AddCardDialog extends DialogFragment implements AdapterView.OnItemS
             }
         });
 
-        final Button removeImageButton = (Button) dialogView.findViewById(R.id.removeImageButton);
+        final ImageButton removeImageButton = (ImageButton) dialogView.findViewById(R.id.removeImageButton);
 
         thumbnailView = (ImageView) dialogView.findViewById(R.id.thumbnail);
         thumbnailView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
@@ -224,9 +224,8 @@ public class AddCardDialog extends DialogFragment implements AdapterView.OnItemS
         frontInput.setText(front);
         backInput.setText(back);
 
-        builder.setTitle("Add Card")
-                .setView(dialogView)
-                .setPositiveButton("Add", new DialogInterface.OnClickListener(){
+        builder.setView(dialogView)
+                .setPositiveButton("Confirm", new DialogInterface.OnClickListener(){
                     @Override
                     public void onClick(DialogInterface dialog, int id){
 

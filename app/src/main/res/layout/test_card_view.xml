@@ -1,25 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:columnCount="2"
+    android:rowCount="3"
+    android:background="@color/backgroundGreyLite"
+    >
     <include layout="@layout/card_view"
-        android:id="@+id/card"/>
+        android:id="@+id/card"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/card_list_item_height"
+        android:layout_margin="@dimen/test_item_margin"
+        android:layout_columnSpan="2"
+        android:layout_rowSpan="1" />
     <Button
         android:id="@+id/answer_1"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginLeft="@dimen/test_item_margin"
+        android:layout_marginBottom="@dimen/test_item_margin"
+        android:layout_columnWeight="1"
+        android:layout_rowWeight="1"
+        android:layout_gravity="left|fill"
+        android:background="@color/test_button_background"
+        />
     <Button
         android:id="@+id/answer_2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginLeft="@dimen/test_item_margin"
+        android:layout_marginBottom="@dimen/test_item_margin"
+        android:layout_marginRight="@dimen/test_item_margin"
+        android:layout_columnWeight="1"
+        android:layout_rowWeight="1"
+        android:layout_gravity="right|fill"
+        android:background="@color/test_button_background"
+        />
     <Button
         android:id="@+id/answer_3"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginLeft="@dimen/test_item_margin"
+        android:layout_marginBottom="@dimen/test_item_margin"
+        android:layout_columnWeight="1"
+        android:layout_rowWeight="1"
+        android:layout_gravity="left|fill"
+        android:background="@color/test_button_background"
+        />
     <Button
         android:id="@+id/answer_4"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginLeft="@dimen/test_item_margin"
+        android:layout_marginBottom="@dimen/test_item_margin"
+        android:layout_marginRight="@dimen/test_item_margin"
+        android:layout_columnWeight="1"
+        android:layout_rowWeight="1"
+        android:layout_gravity="right|fill"
+        android:background="@color/test_button_background"
+        />
 
-</LinearLayout>
+</GridLayout>
