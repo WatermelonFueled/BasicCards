@@ -3,13 +3,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/backgroundGreyLite">
+    android:background="@color/backgroundGrey">
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="4"
         android:layout_margin="@dimen/test_item_margin"
-        android:background="@color/test_button_background">
+        android:background="@color/backgroundWhite">
         <com.watermelonfueled.basiccards.ResultsPieChartView
             android:id="@+id/pie"
             android:layout_width="wrap_content"
@@ -43,7 +43,7 @@
         android:layout_marginLeft="@dimen/test_item_margin"
         android:layout_marginRight="@dimen/test_item_margin"
         android:gravity="center"
-        android:background="@color/test_button_background"
+        android:background="@color/backgroundWhite"
         android:textSize="@dimen/test_results_text_small"
         android:textAlignment="center" />
     <android.support.v7.widget.RecyclerView
@@ -59,6 +59,6 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:background="@color/test_button_background"
+        android:background="@color/backgroundWhite"
         android:text="Exit"/>
 </LinearLayout>

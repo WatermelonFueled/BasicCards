@@ -8,10 +8,10 @@
         android:layout_width="wrap_content"
         android:layout_height="@dimen/dialog_line_height"
         android:layout_margin="@dimen/dialog_margin"
-        android:paddingLeft="4dp"
-        android:layout_alignParentTop="true"
-        android:textSize="20dp"
-        android:text="Substack:"/>
+        android:paddingLeft="@dimen/dialog_margin"
+        android:gravity="center_vertical"
+        android:textSize="18dp"
+        android:text="Category:"/>
     <Spinner
         android:id="@+id/substackSpinner"
         android:layout_width="match_parent"
@@ -24,7 +24,7 @@
         android:layout_width="@dimen/dialog_line_height"
         android:layout_height="@dimen/dialog_line_height"
         android:layout_marginLeft="@dimen/dialog_margin"
-        android:layout_below="@+id/substackText"
+        android:layout_below="@+id/substackSpinner"
         android:background="@color/transparent"
         android:src="@mipmap/ic_photo_library_black_24dp"/>
     <ImageButton
@@ -32,7 +32,7 @@
         android:layout_width="@dimen/dialog_line_height"
         android:layout_height="@dimen/dialog_line_height"
         android:layout_marginLeft="@dimen/dialog_margin"
-        android:layout_below="@+id/substackText"
+        android:layout_alignTop="@+id/addImageButton"
         android:layout_toRightOf="@+id/addImageButton"
         android:background="@color/transparent"
         android:src="@mipmap/ic_photo_camera_black_24dp"/>
@@ -41,14 +41,14 @@
         android:layout_width="80dp"
         android:layout_height="@dimen/dialog_line_height"
         android:layout_marginLeft="@dimen/dialog_margin"
-        android:layout_below="@+id/substackText"
+        android:layout_alignTop="@+id/addImageButton"
         android:layout_toRightOf="@+id/takePhotoButton"
         />
     <ImageButton
         android:id="@+id/removeImageButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/substackSpinner"
+        android:layout_alignTop="@+id/addImageButton"
         android:layout_toRightOf="@id/thumbnail"
         android:background="@color/transparent"
         android:src="@drawable/remove_image_button"

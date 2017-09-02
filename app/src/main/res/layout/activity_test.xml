@@ -3,8 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context="com.watermelonfueled.basiccards.TestActivity">
-
+    <include layout="@layout/toolbar"/>
     <com.watermelonfueled.basiccards.NoSwipeViewPager
         android:id="@+id/pager"
         android:layout_width="match_parent"

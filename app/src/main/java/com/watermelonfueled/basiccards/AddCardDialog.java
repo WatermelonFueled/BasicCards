@@ -170,6 +170,7 @@ public class AddCardDialog extends DialogFragment implements AdapterView.OnItemS
         });
 
         final ImageButton removeImageButton = (ImageButton) dialogView.findViewById(R.id.removeImageButton);
+        removeImageButton.setEnabled(false);
 
         thumbnailView = (ImageView) dialogView.findViewById(R.id.thumbnail);
         thumbnailView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
@@ -191,6 +192,7 @@ public class AddCardDialog extends DialogFragment implements AdapterView.OnItemS
                 }
                 if (image != null) {
                     thumbnailView.setImageBitmap(image);
+                    removeImageButton.setEnabled(true);
                     removeImageButton.setClickable(true);
                     removeImageButton.setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -210,6 +212,7 @@ public class AddCardDialog extends DialogFragment implements AdapterView.OnItemS
                             photoExists = false;
 
                             removeImageButton.setClickable(false);
+                            removeImageButton.setEnabled(false);
 
                             thumbnailView.invalidate();
                         }

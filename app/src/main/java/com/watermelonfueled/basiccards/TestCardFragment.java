@@ -2,6 +2,8 @@ package com.watermelonfueled.basiccards;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.TextViewCompat;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -95,7 +97,11 @@ public class TestCardFragment extends Fragment implements View.OnClickListener{
         button3.setText(questionAnswers[3]);
         button4.setText(questionAnswers[4]);
         ((TextView)view.findViewById(R.id.text_front)).setText(questionAnswers[0]);
-        ((TextView)view.findViewById(R.id.text_back)).setText(questionAnswers[correctPosition]);
+        TextView back = (TextView) view.findViewById(R.id.text_back);
+        back.setText(questionAnswers[correctPosition]);
+        TextViewCompat.setAutoSizeTextTypeWithDefaults(back, TextViewCompat.AUTO_SIZE_TEXT_TYPE_UNIFORM);
+        TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(back, 12, 40, 2, TypedValue.COMPLEX_UNIT_DIP);
+
         if (imagePath != null && !imagePath.equalsIgnoreCase("")) {
             ((ImageView) view.findViewById(R.id.image)).setImageBitmap(ImageHelper.loadImage(imagePath,
                     ImageHelper.getScreenWidthPx(getContext()),

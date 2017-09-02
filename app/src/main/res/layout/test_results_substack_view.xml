@@ -6,7 +6,7 @@
     android:layout_marginLeft="@dimen/test_item_margin"
     android:layout_marginTop="@dimen/test_item_margin"
     android:layout_marginBottom="@dimen/test_item_margin"
-    android:background="@color/test_button_background">
+    android:background="@color/backgroundWhite">
     <TextView
         android:id="@+id/substack_results_name"
         android:layout_width="match_parent"

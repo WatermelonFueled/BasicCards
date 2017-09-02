@@ -2,16 +2,15 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="@dimen/stack_list_item_height"
-    android:layout_marginLeft="@dimen/stack_list_item_padding"
-    android:layout_marginRight="@dimen/stack_list_item_padding"
     android:layout_marginTop="@dimen/stack_list_item_padding"
-    android:background="@color/stackItemBackground">
+    android:background="@color/backgroundWhite">
     <TextView
         android:id="@+id/stack_textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="@dimen/stack_list_item_text_padding"
         android:textSize="@dimen/stack_list_item_text_size"
+        android:textColor="@color/colorAccentDark"
         android:includeFontPadding="false"
         android:maxLines="1"
         android:layout_alignParentLeft="true"

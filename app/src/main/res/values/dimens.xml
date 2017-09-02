@@ -5,7 +5,7 @@
 
     <dimen name="stack_list_item_height">72dp</dimen>
     <dimen name="stack_list_item_height_half">36dp</dimen>
-    <dimen name="stack_list_item_padding">6dp</dimen>
+    <dimen name="stack_list_item_padding">1dp</dimen>
     <dimen name="stack_list_item_text_size">32dp</dimen>
     <dimen name="stack_list_item_text_padding">12dp</dimen>
 
@@ -23,7 +23,7 @@
     <dimen name="dialog_margin_half">4dp</dimen>
     <dimen name="dialog_line_height">48dp</dimen>
 
-    <dimen name="test_item_margin">8dp</dimen>
+    <dimen name="test_item_margin">1dp</dimen>
     <dimen name="test_pie_chart_margin">8dp</dimen>
     <dimen name="test_results_text_margin">6dp</dimen>
     <dimen name="test_results_text_big">64dp</dimen>

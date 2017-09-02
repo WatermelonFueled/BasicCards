@@ -3,11 +3,12 @@ package com.watermelonfueled.basiccards;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.os.StrictMode;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -26,12 +27,14 @@ public class SubstackActivity extends AppCompatActivity
     private final String TAG = "SubstackActivity";
 
     private DbHelper dbHelper;
-    private int stackId, toDeleteOrEditId;
+    private int stackId, toDeleteOrEditId, numSelectedSubstacks;
     private StackViewAdapter adapter;
     private ArrayList<String> substackNameList;
     private ArrayList<Integer> substackIdList;
     private ArrayList<Boolean> substackSelectedList;
-    private String toDeleteOrEditName;
+    private String toDeleteOrEditName, stackName;
+    private Menu menu;
+    private FloatingActionButton listFloatingButton, testFloatingButton;
     Type dialogType;
 
     private final String STACK_ID_KEY = "stackidkey";
@@ -40,38 +43,54 @@ public class SubstackActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_substack);
+        dbHelper = DbHelper.getInstance(this);
 
         if (savedInstanceState != null) {
             stackId = savedInstanceState.getInt(STACK_ID_KEY);
-            substackSelectedList = (ArrayList) savedInstanceState.getSerializable("substackSelectedList");
+            substackSelectedList = (ArrayList<Boolean>) savedInstanceState.getSerializable("substackSelectedList");
+            numSelectedSubstacks = savedInstanceState.getInt("numSelectedSubstacks");
+            stackName = savedInstanceState.getString("stackName");
         } else {
             Intent intent = getIntent();
             stackId = intent.getIntExtra(StackEntry._ID, 0);
-
+            numSelectedSubstacks = 0;
             //TODO set actionbar title to stack name
-            String stackName = intent.getStringExtra(StackEntry.COLUMN_NAME);
+            stackName = intent.getStringExtra(StackEntry.COLUMN_NAME);
         }
 
-        dbHelper = DbHelper.getInstance(this);
         loadSubstackList();
-
         setView();
-
-        //For camera write to file
-        //Allowing Strict mode policy for Nougat support
-        StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
-        StrictMode.setVmPolicy(builder.build());
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState){
         outState.putInt(STACK_ID_KEY, stackId);
         outState.putSerializable("substackSelectedList", substackSelectedList);
-
+        outState.putInt("numSelectedSubstacks", numSelectedSubstacks);
+        outState.putString("stackName", stackName);
         super.onSaveInstanceState(outState);
     }
 
     private void setView() {
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setTitle(stackName);
+        setSupportActionBar(toolbar);
+
+        listFloatingButton = (FloatingActionButton) findViewById(R.id.list_floating_button);
+        listFloatingButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showCardListOnClick();
+            }
+        });
+        testFloatingButton = (FloatingActionButton) findViewById(R.id.test_floating_button);
+        testFloatingButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startTestOnClick();
+            }
+        });
+
         RecyclerView rv = (RecyclerView) findViewById(R.id.rv_list);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         rv.setLayoutManager(layoutManager);
@@ -97,6 +116,7 @@ public class SubstackActivity extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.substackmenu, menu);
+        updateTestAndListButtonVisibility(false);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -106,11 +126,29 @@ public class SubstackActivity extends AppCompatActivity
             case R.id.menu_add_substack:
                 addSubstackOnClick();
                 return true;
-            case R.id.menu_list_cards:
-                showCardListOnClick();
-                return true;
-            case R.id.menu_start_test:
-                startTestOnClick();
+            case R.id.menu_select_all:
+                if (numSelectedSubstacks < substackSelectedList.size()) {
+                    numSelectedSubstacks = substackSelectedList.size();
+                    for (int i = 0; i < substackSelectedList.size(); i++) {
+                        substackSelectedList.set(i, true);
+                    }
+                    //api 24 (android 7.0) required
+                    /*substackSelectedList.replaceAll(new UnaryOperator<Boolean>() {
+                        @Override
+                        public Boolean apply(Boolean aBoolean) {
+                            return true;
+                        }
+                    });*/
+                    updateTestAndListButtonVisibility(true);
+                } else {
+                    for (int i = 0; i < substackSelectedList.size(); i++) {
+                        substackSelectedList.set(i, false);
+                    }
+                    numSelectedSubstacks = 0;
+                    updateTestAndListButtonVisibility(false);
+                }
+                adapter.notifyDataSetChanged();
+                Log.d(TAG, "Select All pressed. SubstackSelectedList: " + substackSelectedList.toString());
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -179,8 +217,22 @@ public class SubstackActivity extends AppCompatActivity
     //LIST AND TEST
     @Override
     public void onListItemClick(int clickedItemIndex) {
-        substackSelectedList.set(clickedItemIndex, !substackSelectedList.get(clickedItemIndex));
+        boolean checked = substackSelectedList.get(clickedItemIndex);
+        if (checked) { numSelectedSubstacks--; } else { numSelectedSubstacks++; }
+        updateTestAndListButtonVisibility(!checked);
+        substackSelectedList.set(clickedItemIndex, !checked);
         Log.i("SUBSTACKACTIVITY", "set index: " + clickedItemIndex + " to: " + substackSelectedList.get(clickedItemIndex));
+
+    }
+
+    private void updateTestAndListButtonVisibility(boolean increased) {
+        if (increased && numSelectedSubstacks >= 1) {
+            testFloatingButton.show();
+            listFloatingButton.show();
+        } else if (!increased && numSelectedSubstacks == 0) {
+            testFloatingButton.hide();
+            listFloatingButton.hide();
+        }
     }
 
     public void showCardListOnClick() {

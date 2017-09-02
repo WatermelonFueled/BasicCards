@@ -3,9 +3,11 @@ package com.watermelonfueled.basiccards;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
+import android.support.v4.widget.TextViewCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.util.SparseArray;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,7 +43,7 @@ public class CardListViewAdapter extends RecyclerView.Adapter<CardListViewAdapte
         this.cardImageList = cardImageList;
         this.context = context;
         targetW = ImageHelper.getScreenWidthPx(context);
-        targetH = ImageHelper.getPixelsFromDp(context,200);
+        targetH = ImageHelper.getPixelsFromDp(context,250);
         Log.d(TAG, "target dimen WxH: " + targetW + " x " + targetH);
     }
 
@@ -93,7 +95,7 @@ public class CardListViewAdapter extends RecyclerView.Adapter<CardListViewAdapte
         TextView front, back;
         ImageView image;
         ViewFlipper flipper;
-        boolean frontShowing;
+        boolean frontShowing, buttonsShowing;
         ImageButton deleteButton, editButton;
         String imagePath;
 
@@ -109,16 +111,16 @@ public class CardListViewAdapter extends RecyclerView.Adapter<CardListViewAdapte
             itemView.setOnClickListener(this);
             itemView.setOnLongClickListener(this);
             itemView.setOnFocusChangeListener(this);
+            TextViewCompat.setAutoSizeTextTypeWithDefaults(back, TextViewCompat.AUTO_SIZE_TEXT_TYPE_UNIFORM);
+            TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(back,12,40,2, TypedValue.COMPLEX_UNIT_DIP);
+            itemView.setFocusable(true);
+            buttonsShowing = false;
         }
 
         @Override
         public void onClick(View view) {
-            //TODO flip card
 //            listener.onListItemClick(getAdapterPosition());
-            view.setFocusableInTouchMode(true);
-            view.requestFocus();
-            deleteButton.setVisibility(View.GONE);
-            editButton.setVisibility(View.GONE);
+            view.requestFocusFromTouch();
             if (frontShowing) {
 
                 flipper.setInAnimation(view.getContext(), R.anim.card_flip_bottom_in);
@@ -127,7 +129,6 @@ public class CardListViewAdapter extends RecyclerView.Adapter<CardListViewAdapte
             } else {
                 flipper.showPrevious();
             }
-            view.clearFocus();
         }
 
         @Override
@@ -135,25 +136,32 @@ public class CardListViewAdapter extends RecyclerView.Adapter<CardListViewAdapte
             int clickedPosition = getAdapterPosition();
             deleteButton.setTag(clickedPosition);
             editButton.setTag(clickedPosition);
-            view.setFocusableInTouchMode(true);
-            view.requestFocus();
+            view.requestFocusFromTouch();
+            buttonsShow();
             return true;
         }
 
         @Override
         public void onFocusChange(View view, boolean hasFocus) {
-            if (hasFocus) {
-                deleteButton.setVisibility(View.VISIBLE);
-                deleteButton.startAnimation(AnimationUtils.loadAnimation(context,R.anim.button_slide_left_in));
-                editButton.setVisibility(View.VISIBLE);
-                editButton.startAnimation(AnimationUtils.loadAnimation(context,R.anim.button_slide_left_in));
-            } else {
-                deleteButton.startAnimation(AnimationUtils.loadAnimation(context,R.anim.button_slide_right_out));
-                deleteButton.setVisibility(View.GONE);
-                editButton.startAnimation(AnimationUtils.loadAnimation(context,R.anim.button_slide_right_out));
-                editButton.setVisibility(View.GONE);
-                view.setFocusableInTouchMode(false);
+            if (!hasFocus && buttonsShowing) {
+                buttonsHide();
             }
+        }
+
+        private void buttonsHide() {
+            deleteButton.startAnimation(AnimationUtils.loadAnimation(context,R.anim.button_slide_right_out));
+            deleteButton.setVisibility(View.GONE);
+            editButton.startAnimation(AnimationUtils.loadAnimation(context,R.anim.button_slide_right_out));
+            editButton.setVisibility(View.GONE);
+            buttonsShowing = false;
+        }
+
+        private void buttonsShow() {
+            deleteButton.setVisibility(View.VISIBLE);
+            deleteButton.startAnimation(AnimationUtils.loadAnimation(context,R.anim.button_slide_left_in));
+            editButton.setVisibility(View.VISIBLE);
+            editButton.startAnimation(AnimationUtils.loadAnimation(context,R.anim.button_slide_left_in));
+            buttonsShowing = true;
         }
     }
 

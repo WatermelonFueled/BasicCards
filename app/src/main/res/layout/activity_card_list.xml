@@ -6,12 +6,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.watermelonfueled.basiccards.CardListActivity">
+    <include layout="@layout/toolbar"/>
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rv_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:paddingBottom="@dimen/card_list_item_margin"
-        android:background="@color/backgroundGreyLite"
+        android:background="@color/backgroundGrey"
         android:clipToPadding="false"/>
 
 </LinearLayout>

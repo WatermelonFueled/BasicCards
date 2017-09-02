@@ -65,6 +65,7 @@ public class StackViewAdapter extends RecyclerView.Adapter<StackViewAdapter.Stac
                         View.OnFocusChangeListener {
         TextView stackTextView;
         ImageButton deleteButton, editButton;
+        boolean buttonsShowing;
 
         public StackViewHolder(View itemView) {
             super(itemView);
@@ -74,16 +75,14 @@ public class StackViewAdapter extends RecyclerView.Adapter<StackViewAdapter.Stac
             itemView.setOnClickListener(this);
             itemView.setOnLongClickListener(this);
             itemView.setOnFocusChangeListener(this);
+
+            itemView.setFocusable(true);
+            buttonsShowing = false;
         }
 
         @Override
         public void onClick(View view) {
-            view.setFocusableInTouchMode(true);
-            view.requestFocus();
-            view.setFocusableInTouchMode(false);
-
-            deleteButton.setVisibility(View.GONE);
-            editButton.setVisibility(View.GONE);
+            view.requestFocusFromTouch();
 
             int clickedPosition = getAdapterPosition();
             onClickListener.onListItemClick(clickedPosition);
@@ -97,25 +96,31 @@ public class StackViewAdapter extends RecyclerView.Adapter<StackViewAdapter.Stac
             int clickedPosition = getAdapterPosition();
             deleteButton.setTag(clickedPosition);
             editButton.setTag(clickedPosition);
-            view.setFocusableInTouchMode(true);
-            view.requestFocus();
+            view.requestFocusFromTouch();
+            buttonsShow();
             return true;
         }
 
         @Override
         public void onFocusChange(View v, boolean hasFocus) {
-            if (hasFocus) {
-                deleteButton.setVisibility(View.VISIBLE);
-                deleteButton.startAnimation(AnimationUtils.loadAnimation(context,R.anim.button_slide_left_in));
-                editButton.setVisibility(View.VISIBLE);
-                editButton.startAnimation(AnimationUtils.loadAnimation(context,R.anim.button_slide_left_in));
-            } else {
-                deleteButton.startAnimation(AnimationUtils.loadAnimation(context,R.anim.button_slide_right_out));
-                deleteButton.setVisibility(View.GONE);
-                editButton.startAnimation(AnimationUtils.loadAnimation(context,R.anim.button_slide_right_out));
-                editButton.setVisibility(View.GONE);
-                v.setFocusableInTouchMode(false);
+            if (!hasFocus && buttonsShowing) {
+                buttonsHide();
             }
+        }
+
+        private void buttonsHide(){
+            deleteButton.startAnimation(AnimationUtils.loadAnimation(context,R.anim.button_slide_right_out));
+            deleteButton.setVisibility(View.GONE);
+            editButton.startAnimation(AnimationUtils.loadAnimation(context,R.anim.button_slide_right_out));
+            editButton.setVisibility(View.GONE);
+            buttonsShowing = false;
+        }
+        private void buttonsShow(){
+            deleteButton.setVisibility(View.VISIBLE);
+            deleteButton.startAnimation(AnimationUtils.loadAnimation(context,R.anim.button_slide_left_in));
+            editButton.setVisibility(View.VISIBLE);
+            editButton.startAnimation(AnimationUtils.loadAnimation(context,R.anim.button_slide_left_in));
+            buttonsShowing = true;
         }
     }
 

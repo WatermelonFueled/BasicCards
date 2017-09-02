@@ -8,11 +8,12 @@
     android:focusableInTouchMode="true"
     android:clickable="true"
     tools:context="com.watermelonfueled.basiccards.MainActivity">
+    <include layout="@layout/toolbar"/>
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rv_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:paddingBottom="@dimen/stack_list_item_padding"
-        android:background="@color/backgroundGreyLite"
+        android:background="@color/backgroundGrey"
         android:clipToPadding="false"/>
 </LinearLayout>

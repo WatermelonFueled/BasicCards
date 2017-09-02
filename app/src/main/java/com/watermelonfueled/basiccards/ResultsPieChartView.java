@@ -62,11 +62,11 @@ public class ResultsPieChartView extends View {
         Paint paint = new Paint();
         paint.setStyle(Paint.Style.FILL);
         if (iteration % 2 == 0) {
-            paint.setColor(getResources().getColor(R.color.pie_chart_correct));
+            paint.setColor(getResources().getColor(R.color.colorPrimaryDark));
         } else {
-            paint.setColor(getResources().getColor(R.color.pie_chart_incorrect));
+            paint.setColor(getResources().getColor(R.color.colorAccentLight));
         }
-        paint.setAlpha(200);
+        paint.setAlpha(255);
         return paint;
     }
 

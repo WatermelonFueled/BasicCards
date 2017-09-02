@@ -10,6 +10,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 
@@ -75,6 +76,10 @@ public class TestActivity extends AppCompatActivity {
             position = 0;
         }
 
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setTitle("Test");
+        setSupportActionBar(toolbar);
+
         setView();
     }
 
@@ -119,6 +124,9 @@ public class TestActivity extends AppCompatActivity {
             substackIdsStringArray[i] = String.valueOf(substackIdsArrayList.get(i));
         }
         Cursor cursor = DbHelper.getInstance(this).loadCardsTable(substackIdsStringArray);
+
+        if (cursor.getCount() == 0) { goBack();} // no cards in substack(s)
+
         order = new ArrayList<>(cursor.getCount());
         cardData = new String[4][cursor.getCount()];
 

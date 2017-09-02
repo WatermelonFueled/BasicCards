@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" android:layout_height="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
     <ViewFlipper
         android:id="@+id/view_flipper"
         android:layout_width="match_parent"
@@ -24,10 +25,11 @@
                 android:layout_alignParentBottom="true"
                 android:gravity="center_vertical"
                 android:padding="@dimen/card_list_item_text_padding"
-                android:includeFontPadding="false"
                 android:textSize="@dimen/card_list_item_text_size"
+                android:includeFontPadding="false"
                 android:textColor="@color/card_text_front"
-                android:background="@color/background_grey_translucent" />
+                android:background="@color/background_grey_translucent"
+                />
         </RelativeLayout>
         <TextView
             android:id="@+id/text_back"
@@ -36,7 +38,7 @@
             android:layout_gravity="center"
             android:padding="@dimen/card_list_item_text_padding"
             android:includeFontPadding="false"
-            android:background="@color/backgroundGrey"
+            android:background="@color/colorAccentDark"
             android:textSize="@dimen/card_list_item_text_size"
             android:textColor="@color/card_text_front" />
     </ViewFlipper>

@@ -1,18 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_stack"
-    android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:focusableInTouchMode="true"
     android:clickable="true"
     tools:context="com.watermelonfueled.basiccards.SubstackActivity">
+    <include layout="@layout/toolbar"/>
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rv_list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_alignParentBottom="true"
+        android:layout_below="@+id/toolbar"
         android:paddingBottom="@dimen/stack_list_item_padding"
-        android:background="@color/backgroundGreyLite"
+        android:background="@color/backgroundGrey"
         android:clipToPadding="false"/>
-</LinearLayout>
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/list_floating_button"
+        android:src="@mipmap/ic_list_white_24dp"
+        android:backgroundTint="@color/colorAccent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="16dp"
+        android:clickable="true"
+        android:layout_alignParentRight="true"
+        android:layout_above="@+id/test_floating_button"
+        />
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/test_floating_button"
+        android:src="@mipmap/ic_school_white_24dp"
+        android:backgroundTint="@color/colorAccent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:clickable="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        />
+
+</RelativeLayout>

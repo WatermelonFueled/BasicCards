@@ -9,7 +9,7 @@
         android:layout_height="@dimen/edit_button_height"
         android:layout_alignParentBottom="true"
         android:layout_toLeftOf="@+id/delete_button"
-        android:background="@color/editGrey" />
+        android:background="@color/colorAccentLight" />
     <ImageButton
         android:id="@+id/delete_button"
         android:src="@mipmap/ic_delete_white_24dp"
@@ -18,6 +18,6 @@
         android:layout_height="@dimen/edit_button_height"
         android:layout_alignParentRight="true"
         android:layout_alignParentBottom="true"
-        android:background="@color/deleteRedMuted"
+        android:background="@color/warningRed"
         android:onClick="deleteButtonOnClick"/>
 </merge>

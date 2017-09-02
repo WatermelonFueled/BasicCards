@@ -5,10 +5,12 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Menu;
@@ -39,7 +41,6 @@ public class CardListActivity extends AppCompatActivity
     private ArrayList<Integer> cardIdList, cardSubstackIdList, substackIds, allSubstackIds;
     private ArrayList<String> cardFrontList, cardBackList, substackNames, allSubstackNames;
     private SparseArray<String> cardImageList;
-//    private String[] substackIds;
     private int toDeleteOrEditIndex, addOrEditCardToSubstackIndex;
     private boolean editCardMode, editOldImageExistsNotPreserved;
 
@@ -70,10 +71,18 @@ public class CardListActivity extends AppCompatActivity
             editCardMode = false;
         }
 
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setTitle("Card List");
+        setSupportActionBar(toolbar);
+
         dbHelper = DbHelper.getInstance(this);
         loadCards();
-
         setView();
+
+        //For camera write to file
+        //Allowing Strict mode policy for Nougat support
+        StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+        StrictMode.setVmPolicy(builder.build());
     }
 
     @Override

@@ -4,9 +4,9 @@
     android:layout_height="match_parent"
     android:columnCount="2"
     android:rowCount="3"
-    android:background="@color/backgroundGreyLite"
+    android:background="@color/backgroundGrey"
     >
-    <include layout="@layout/card_view"
+    <include layout="@layout/card_flipper"
         android:id="@+id/card"
         android:layout_width="match_parent"
         android:layout_height="@dimen/card_list_item_height"
@@ -22,7 +22,7 @@
         android:layout_columnWeight="1"
         android:layout_rowWeight="1"
         android:layout_gravity="left|fill"
-        android:background="@color/test_button_background"
+        android:background="@color/backgroundWhite"
         />
     <Button
         android:id="@+id/answer_2"
@@ -34,7 +34,7 @@
         android:layout_columnWeight="1"
         android:layout_rowWeight="1"
         android:layout_gravity="right|fill"
-        android:background="@color/test_button_background"
+        android:background="@color/backgroundWhite"
         />
     <Button
         android:id="@+id/answer_3"
@@ -45,7 +45,7 @@
         android:layout_columnWeight="1"
         android:layout_rowWeight="1"
         android:layout_gravity="left|fill"
-        android:background="@color/test_button_background"
+        android:background="@color/backgroundWhite"
         />
     <Button
         android:id="@+id/answer_4"
@@ -57,7 +57,7 @@
         android:layout_columnWeight="1"
         android:layout_rowWeight="1"
         android:layout_gravity="right|fill"
-        android:background="@color/test_button_background"
+        android:background="@color/backgroundWhite"
         />
 
 </GridLayout>
