@@ -29,7 +29,7 @@ public class MainActivity extends AppCompatActivity
     private ArrayList<String> stackNameList;
     private ArrayList<Integer> stackIdList;
     private StackViewAdapter adapter;
-    private int toDeleteOrEditId;
+    private int toDeleteOrEditId, toDeleteOrEditPosition;
     private String toDeleteOrEditName;
 
     Type dialogType;
@@ -42,9 +42,23 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        if (savedInstanceState != null) {
+            toDeleteOrEditName = savedInstanceState.getString("toDeleteOrEditName");
+            toDeleteOrEditId = savedInstanceState.getInt("toDeleteOrEditId");
+            toDeleteOrEditPosition = savedInstanceState.getInt("toDeleteOrEditPosition");
+        }
+
         dbHelper = DbHelper.getInstance(this);
         loadStackList();
         setView();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outstate) {
+        outstate.putInt("toDeleteOrEditId",toDeleteOrEditId);
+        outstate.putInt("toDeleteOrEditPosition",toDeleteOrEditPosition);
+        outstate.putString("toDeleteOrEditName",toDeleteOrEditName);
+        super.onSaveInstanceState(outstate);
     }
 
     private void setView(){
@@ -101,36 +115,45 @@ public class MainActivity extends AppCompatActivity
         String toast;
         switch (getType()) {
             case CREATE:
-                dbHelper.addStack(stackName);
-                toast = "Added: " + stackName;
+                long id = dbHelper.addStack(stackName);
+                if (id == -1) {
+                    toast = "Failed to create: " + stackName;
+                } else {
+                    toast = "Added: " + stackName;
+                    stackNameList.add(stackName);
+                    stackIdList.add((int)id);
+                    adapter.notifyItemInserted(adapter.getItemCount()-1);
+                }
                 break;
             case EDIT:
                 if (stackName.equals(toDeleteOrEditName)){
                     return; //no change
                 }
-                dbHelper.updateStack(toDeleteOrEditId, stackName);
-                toast = "Changed " + toDeleteOrEditName + " to " + stackName;
+                if (dbHelper.updateStack(toDeleteOrEditId, stackName)) {
+                    toast = "Changed " + toDeleteOrEditName + " to " + stackName;
+                    stackNameList.set(toDeleteOrEditPosition, stackName);
+                    adapter.notifyItemChanged(toDeleteOrEditPosition);
+                } else { toast = "Failed to edit name"; }
                 break;
             default:
                 toast = "";
         }
-        updated(); //TODO update single item instead of general update
         makeToast(toast);
     }
 
     public void editButtonOnClick(View button) {
         dialogType = Type.EDIT;
-        int position = (int) button.getTag();
-        toDeleteOrEditId = stackIdList.get(position);
-        toDeleteOrEditName = stackNameList.get(position);
+        toDeleteOrEditPosition = (int) button.getTag();
+        toDeleteOrEditId = stackIdList.get(toDeleteOrEditPosition);
+        toDeleteOrEditName = stackNameList.get(toDeleteOrEditPosition);
         DialogFragment dialog = new AddStackDialog();
         dialog.show(getSupportFragmentManager(), "EditStackDialog");
     }
 
     public void deleteButtonOnClick(View button) {
-        int position = (int) button.getTag();
-        toDeleteOrEditId = stackIdList.get(position);
-        toDeleteOrEditName = stackNameList.get(position);
+        toDeleteOrEditPosition = (int) button.getTag();
+        toDeleteOrEditId = stackIdList.get(toDeleteOrEditPosition);
+        toDeleteOrEditName = stackNameList.get(toDeleteOrEditPosition);
         DeleteDialog dialog = new DeleteDialog();
         dialog.setConfirmMessage("Are you sure you want to delete: " +
                 toDeleteOrEditName + "?");
@@ -139,9 +162,14 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onDeleteDialogPositiveClick(DialogFragment dialog) {
-        dbHelper.deleteStack(toDeleteOrEditId);
-        updated();
-        makeToast("Deleted: " + toDeleteOrEditName);
+        if (dbHelper.deleteStack(toDeleteOrEditId)) {
+            stackIdList.remove(toDeleteOrEditPosition);
+            stackNameList.remove(toDeleteOrEditPosition);
+            adapter.notifyItemRemoved(toDeleteOrEditPosition);
+            makeToast("Deleted: " + toDeleteOrEditName);
+        } else {
+            makeToast("Failed to delete: " + toDeleteOrEditName);
+        }
     }
 
     @Override
@@ -152,11 +180,6 @@ public class MainActivity extends AppCompatActivity
     @Override
     public String getNameToEdit() {
         return toDeleteOrEditName;
-    }
-
-    private void updated() {
-        loadStackList();
-        adapter.updated(stackNameList);
     }
 
     private void makeToast(String msg){

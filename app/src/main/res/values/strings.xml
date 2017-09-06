@@ -1,17 +1,42 @@
 <resources>
     <string name="app_name">Basic Cards</string>
-
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="card_list_activity_title">Review Cards</string>
+    <string name="test_activity_title">Test</string>
 
     <string-array name="test_results_blurb_array">
+        <!--0-24%-->
+        <item>Let\'s try to get some more reviewing done!</item>
+        <!--25-49%-->
+        <item>Let\'s try to get some more reviewing done!</item>
+        <!--50-59%-->
+        <item>It\'s a start. I think you can do better next time!</item>
+        <!--60-69%-->
+        <item>Not too shabby, just need to polish up with some review!</item>
+        <!--70-79%-->
+        <item>Good work. Let\'s raise the bar on the next test.</item>
+        <!--80-89%-->
+        <item>Looking sharp! Keep it up!</item>
+        <!--90-99%-->
+        <item>Great job! Only a few cards to review and perfect.</item>
+        <!--100%-->
+        <item>Perfect! Time to add more cards and take on the next challenge!</item>
+    </string-array>
+    <string-array name="test_results_blurb_array_savage">
+        <!--0-24%-->
         <item>Lower than random chance would predict. Don\'t buy a lottery ticket today.</item>
+        <!--25-49%-->
         <item>The important thing is that you tried.</item>
+        <!--50-59%-->
         <item>You would make a great politician with polls like this!</item>
+        <!--60-69%-->
         <item>Well, it\'s better than I expected of you.</item>
+        <!--70-79%-->
         <item>What does it feel like? Being average?</item>
+        <!--80-89%-->
         <item>Good job! You did as well as my goldfish!</item>
+        <!--90-99%-->
         <item>Wow! What a high score! What are you trying to compensate for?</item>
+        <!--100%-->
         <item>A perfect score? I was just going easy on you.</item>
     </string-array>
 </resources>

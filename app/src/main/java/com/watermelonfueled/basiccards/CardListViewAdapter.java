@@ -25,19 +25,13 @@ import java.util.ArrayList;
 public class CardListViewAdapter extends RecyclerView.Adapter<CardListViewAdapter.CardListViewHolder>{
     private final String TAG = "CardListViewAdapter";
 
-    final private ListItemClickListener listener;
-    public interface ListItemClickListener {
-        void onListItemClick(int clickedItemIndex);
-    }
-
     private ArrayList<String> cardFrontList, cardBackList;
     private SparseArray<String> cardImageList;
     private int targetW,targetH;
     private Context context;
 
-    public CardListViewAdapter(ListItemClickListener listener, ArrayList<String> cardFrontList,
-                               ArrayList<String> cardBackList, SparseArray<String> cardImageList, Context context) {
-        this.listener = listener;
+    public CardListViewAdapter(ArrayList<String> cardFrontList, ArrayList<String> cardBackList,
+                               SparseArray<String> cardImageList, Context context) {
         this.cardFrontList = cardFrontList;
         this.cardBackList = cardBackList;
         this.cardImageList = cardImageList;
@@ -79,6 +73,8 @@ public class CardListViewAdapter extends RecyclerView.Adapter<CardListViewAdapte
                 holder.image.setImageBitmap(result);
             } else {
                 holder.image.setImageDrawable(null);
+                holder.front.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
+                holder.front.requestLayout();
                 //holder.image.setImageResource(android.R.color.transparent);
             }
         }
@@ -113,13 +109,14 @@ public class CardListViewAdapter extends RecyclerView.Adapter<CardListViewAdapte
             itemView.setOnFocusChangeListener(this);
             TextViewCompat.setAutoSizeTextTypeWithDefaults(back, TextViewCompat.AUTO_SIZE_TEXT_TYPE_UNIFORM);
             TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(back,12,40,2, TypedValue.COMPLEX_UNIT_DIP);
+            TextViewCompat.setAutoSizeTextTypeWithDefaults(front, TextViewCompat.AUTO_SIZE_TEXT_TYPE_UNIFORM);
+            TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(front, 12, 40, 2, TypedValue.COMPLEX_UNIT_DIP);
             itemView.setFocusable(true);
             buttonsShowing = false;
         }
 
         @Override
         public void onClick(View view) {
-//            listener.onListItemClick(getAdapterPosition());
             view.requestFocusFromTouch();
             if (frontShowing) {
 
@@ -163,14 +160,6 @@ public class CardListViewAdapter extends RecyclerView.Adapter<CardListViewAdapte
             editButton.startAnimation(AnimationUtils.loadAnimation(context,R.anim.button_slide_left_in));
             buttonsShowing = true;
         }
-    }
-
-    public void updated(ArrayList<String> updatedFrontList, ArrayList<String> updatedBackList,
-                        SparseArray<String> updatedImageList){
-        cardFrontList = updatedFrontList;
-        cardBackList = updatedBackList;
-        cardImageList = updatedImageList;
-        this.notifyDataSetChanged();
     }
 
 }

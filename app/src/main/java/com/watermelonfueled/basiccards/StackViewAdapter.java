@@ -124,11 +124,6 @@ public class StackViewAdapter extends RecyclerView.Adapter<StackViewAdapter.Stac
         }
     }
 
-    public void updated(ArrayList<String> updatedStackNameList) {
-        stackNameList = updatedStackNameList;
-        this.notifyDataSetChanged();
-    }
-
     //substackactivity specific methods
     private boolean isSubstackActivity() {
         return layout == R.layout.substack_view;

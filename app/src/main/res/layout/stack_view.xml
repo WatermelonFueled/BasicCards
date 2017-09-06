@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         android:padding="@dimen/stack_list_item_text_padding"
         android:textSize="@dimen/stack_list_item_text_size"
-        android:textColor="@color/colorAccentDark"
+        android:textColor="@color/font_dark"
         android:includeFontPadding="false"
         android:maxLines="1"
         android:layout_alignParentLeft="true"

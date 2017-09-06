@@ -26,8 +26,7 @@ import java.util.ArrayList;
 import static com.watermelonfueled.basiccards.CardsContract.CardEntry;
 
 public class CardListActivity extends AppCompatActivity
-        implements CardListViewAdapter.ListItemClickListener,
-        DeleteDialog.DeleteDialogListener,
+        implements DeleteDialog.DeleteDialogListener,
         AddCardDialog.AddCardDialogListener {
 
     private final String TAG = "CardListActivity";
@@ -72,7 +71,7 @@ public class CardListActivity extends AppCompatActivity
         }
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle("Card List");
+        toolbar.setTitle(R.string.card_list_activity_title);
         setSupportActionBar(toolbar);
 
         dbHelper = DbHelper.getInstance(this);
@@ -114,13 +113,12 @@ public class CardListActivity extends AppCompatActivity
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         rv.setLayoutManager(layoutManager);
 
-        //TODO make faster scrolling and loading
         rv.setHasFixedSize(true);
         rv.setItemViewCacheSize(20);
         rv.setDrawingCacheEnabled(true);
         rv.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_HIGH);
 
-        adapter = new CardListViewAdapter(this, cardFrontList, cardBackList, cardImageList, this);
+        adapter = new CardListViewAdapter(cardFrontList, cardBackList, cardImageList, this);
         rv.setAdapter(adapter);
     }
 
@@ -136,7 +134,6 @@ public class CardListActivity extends AppCompatActivity
         cardSubstackIdList = new ArrayList<>(cursor.getCount());
         cardImageList = new SparseArray<>(cursor.getCount());
         while(cursor.moveToNext()){
-            Log.d(TAG, "card +1");
             cardFrontList.add(cursor.getString(cursor.getColumnIndex(CardEntry.COLUMN_QUESTION)));
             cardBackList.add(cursor.getString(cursor.getColumnIndex(CardEntry.COLUMN_ANSWER)));
             cardIdList.add(cursor.getInt(cursor.getColumnIndex(CardEntry._ID)));
@@ -166,11 +163,6 @@ public class CardListActivity extends AppCompatActivity
             default:
                 return super.onOptionsItemSelected(item);
         }
-    }
-
-    @Override
-    public void onListItemClick(int clickedItemIndex) {
-
     }
 
     // ADD/EDIT CARD //
@@ -237,21 +229,40 @@ public class CardListActivity extends AppCompatActivity
             }
         }
 
-        if (editCardMode) {
-            // Edit card
+        if (editCardMode) { // Edit card
             if (!editOldImageExistsNotPreserved && cardImageList.get(toDeleteOrEditIndex) != null) {
                 // delete old image file
                 File oldFile = new File(cardImageList.get(toDeleteOrEditIndex));
                 oldFile.delete();
             }
-            dbHelper.updateCard(cardIdList.get(toDeleteOrEditIndex),
+            if (dbHelper.updateCard(cardIdList.get(toDeleteOrEditIndex),
                     allSubstackIds.get(addOrEditCardToSubstackIndex),
-                    front, back, path);
-        } else {
-            // Add new card
-            dbHelper.addCard(front, back, substackIds.get(addOrEditCardToSubstackIndex), path);
+                    front, back, path)) {
+                if (substackIds.contains(allSubstackIds.get(addOrEditCardToSubstackIndex))) {
+                    //card is part of selected substacks
+                    cardFrontList.set(toDeleteOrEditIndex, front);
+                    cardBackList.set(toDeleteOrEditIndex, back);
+                    cardImageList.setValueAt(toDeleteOrEditIndex, path);
+                    cardSubstackIdList.set(toDeleteOrEditIndex,allSubstackIds.get(addOrEditCardToSubstackIndex));
+                    adapter.notifyItemChanged(toDeleteOrEditIndex);
+                } else {
+                    //card is not part of selected substacks
+                    removeCardFromListAndAdapter(toDeleteOrEditIndex);
+                }
+            }
+        } else { // Add new card
+            long id = dbHelper.addCard(front, back, substackIds.get(addOrEditCardToSubstackIndex), path);
+            if (id == -1) {
+                //failed to create
+            } else {
+                cardIdList.add((int)id);
+                cardFrontList.add(front);
+                cardBackList.add(back);
+                cardImageList.append(cardImageList.size(),path);
+                cardSubstackIdList.add(substackIds.get(addOrEditCardToSubstackIndex));
+                adapter.notifyItemInserted(adapter.getItemCount()-1);
+            }
         }
-        updated();
         clearAddOrEdit();
     }
 
@@ -332,13 +343,17 @@ public class CardListActivity extends AppCompatActivity
 
     @Override
     public void onDeleteDialogPositiveClick(DialogFragment dialog) {
-        dbHelper.deleteCard(cardIdList.get(toDeleteOrEditIndex));
-        updated();
+        if (dbHelper.deleteCard(cardIdList.get(toDeleteOrEditIndex))) {
+            removeCardFromListAndAdapter(toDeleteOrEditIndex);
+        }
     }
 
-    private void updated() {
-        loadCards();
-        adapter.updated(cardFrontList, cardBackList, cardImageList);
+    private void removeCardFromListAndAdapter(int index) {
+        cardFrontList.remove(index);
+        cardBackList.remove(index);
+        cardImageList.remove(index);
+        cardIdList.remove(index);
+        adapter.notifyItemRemoved(index);
     }
 
 }

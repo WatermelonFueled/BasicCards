@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import static com.watermelonfueled.basiccards.CardsContract.StackEntry;
 import static com.watermelonfueled.basiccards.CardsContract.SubstackEntry;
 
+//TODO extend MainActivity and reduce repetition
 public class SubstackActivity extends AppCompatActivity
         implements StackViewAdapter.ListItemClickListener,
         AddStackDialog.AddStackDialogListener,
@@ -27,7 +28,7 @@ public class SubstackActivity extends AppCompatActivity
     private final String TAG = "SubstackActivity";
 
     private DbHelper dbHelper;
-    private int stackId, toDeleteOrEditId, numSelectedSubstacks;
+    private int stackId, toDeleteOrEditId, toDeleteOrEditPosition, numSelectedSubstacks;
     private StackViewAdapter adapter;
     private ArrayList<String> substackNameList;
     private ArrayList<Integer> substackIdList;
@@ -54,7 +55,6 @@ public class SubstackActivity extends AppCompatActivity
             Intent intent = getIntent();
             stackId = intent.getIntExtra(StackEntry._ID, 0);
             numSelectedSubstacks = 0;
-            //TODO set actionbar title to stack name
             stackName = intent.getStringExtra(StackEntry.COLUMN_NAME);
         }
 
@@ -166,32 +166,42 @@ public class SubstackActivity extends AppCompatActivity
     public void onAddStackDialogPositiveClick(DialogFragment dialog, String substackName) {
         switch (getType()) {
             case CREATE:
-                dbHelper.addSubstack(substackName,stackId);
-                substackSelectedList.add(false);
+                long id = dbHelper.addSubstack(substackName,stackId);
+                if (id == -1) {
+                    //failed to add
+                    return;
+                } else {
+                    substackSelectedList.add(false);
+                    substackNameList.add(substackName);
+                    substackIdList.add((int)id);
+                    adapter.notifyItemInserted(adapter.getItemCount()-1);
+                }
                 break;
             case EDIT:
                 if (substackName.equals(toDeleteOrEditName)) {
                     return; //no change
                 }
-                dbHelper.updateSubstack(toDeleteOrEditId, substackName);
+                if (dbHelper.updateSubstack(toDeleteOrEditId, substackName)) {
+                    substackNameList.set(toDeleteOrEditPosition, substackName);
+                    adapter.notifyItemChanged(toDeleteOrEditPosition);
+                }
                 break;
         }
-        updated();
     }
 
     public void editButtonOnClick(View button) {
         dialogType = Type.EDIT;
-        int position = (int) button.getTag();
-        toDeleteOrEditId = substackIdList.get(position);
-        toDeleteOrEditName = substackNameList.get(position);
+        toDeleteOrEditPosition = (int) button.getTag();
+        toDeleteOrEditId = substackIdList.get(toDeleteOrEditPosition);
+        toDeleteOrEditName = substackNameList.get(toDeleteOrEditPosition);
         DialogFragment dialog = new AddStackDialog();
         dialog.show(getSupportFragmentManager(), "DeleteSubstackDialog");
     }
 
     public void deleteButtonOnClick(View button) {
-        int position = (int) button.getTag();
-        toDeleteOrEditId = substackIdList.get(position);
-        toDeleteOrEditName = substackNameList.get(position);
+        toDeleteOrEditPosition = (int) button.getTag();
+        toDeleteOrEditId = substackIdList.get(toDeleteOrEditPosition);
+        toDeleteOrEditName = substackNameList.get(toDeleteOrEditPosition);
         DeleteDialog dialog = new DeleteDialog();
         dialog.setConfirmMessage("Are you sure you want to delete: " +
                 toDeleteOrEditName + "? All its contents will be deleted.");
@@ -200,8 +210,12 @@ public class SubstackActivity extends AppCompatActivity
 
     @Override
     public void onDeleteDialogPositiveClick(DialogFragment dialog) {
-        dbHelper.deleteSubstack(toDeleteOrEditId);
-        updated();
+        if (dbHelper.deleteSubstack(toDeleteOrEditId)) {
+            substackIdList.remove(toDeleteOrEditPosition);
+            substackNameList.remove(toDeleteOrEditPosition);
+            substackSelectedList.remove(toDeleteOrEditPosition);
+            adapter.notifyItemRemoved(toDeleteOrEditPosition);
+        }
     }
 
     @Override
@@ -266,11 +280,5 @@ public class SubstackActivity extends AppCompatActivity
             }
         }
         return selectedList;
-    }
-
-    //update
-    private void updated() {
-        loadSubstackList();
-        adapter.updated(substackNameList);
     }
 }

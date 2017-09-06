@@ -97,17 +97,17 @@ public class DbHelper extends SQLiteOpenHelper {
     }
 
     //CREATE
-    public void addStack(String name) {
+    public long addStack(String name) {
         ContentValues cv = new ContentValues();
         cv.put(StackEntry.COLUMN_NAME, name);
-        db.insert(StackEntry.TABLE_NAME, null, cv);
+        return db.insert(StackEntry.TABLE_NAME, null, cv);
     }
 
-    public void addSubstack(String name, int stackId) {
+    public long addSubstack(String name, int stackId) {
         ContentValues cv = new ContentValues();
         cv.put(SubstackEntry.COLUMN_NAME, name);
         cv.put(SubstackEntry.COLUMN_STACK, stackId);
-        db.insert(SubstackEntry.TABLE_NAME, null, cv);
+        return db.insert(SubstackEntry.TABLE_NAME, null, cv);
     }
 
 //    public void addCard(String question, String answer, int substackId, Uri imageUri) {
@@ -126,7 +126,7 @@ public class DbHelper extends SQLiteOpenHelper {
 //        db.insert(CardEntry.TABLE_NAME, null, cv);
 //    }
 
-    public void addCard(String question, String answer, int substackId, String imagePath) {
+    public long addCard(String question, String answer, int substackId, String imagePath) {
         ContentValues cv = new ContentValues();
         cv.put(CardEntry.COLUMN_QUESTION, question);
         cv.put(CardEntry.COLUMN_ANSWER, answer);
@@ -134,7 +134,7 @@ public class DbHelper extends SQLiteOpenHelper {
 
         cv.put(CardEntry.COLUMN_IMAGE, imagePath);
 
-        db.insert(CardEntry.TABLE_NAME, null, cv);
+        return db.insert(CardEntry.TABLE_NAME, null, cv);
     }
 
     public String storeImage(Uri uri) throws FileNotFoundException, IOException{
@@ -229,7 +229,13 @@ public class DbHelper extends SQLiteOpenHelper {
         String selection = StackEntry._ID + "=?";
         String[] selectionArgs = { String.valueOf(id) };
         int count = db.update(StackEntry.TABLE_NAME, cv, selection, selectionArgs);
-        if (count <= 0 ) { return false; } else { return true; }
+        if (count == 1 ) {
+            Log.d(TAG, "Updated stack name to: " + newName);
+            return true;
+        } else {
+            Log.d(TAG, "Failed to update stack name");
+            return false;
+        }
     }
 
     public boolean updateSubstack(int id, String newName){
@@ -238,7 +244,13 @@ public class DbHelper extends SQLiteOpenHelper {
         String selection = SubstackEntry._ID + "=?";
         String[] selectionArgs = { String.valueOf(id) };
         int count = db.update(SubstackEntry.TABLE_NAME, cv, selection, selectionArgs);
-        if (count <= 0 ) { return false; } else { return true; }
+        if (count == 1 ) {
+            Log.d(TAG, "Updated substack name to: " + newName);
+            return true;
+        } else {
+            Log.d(TAG, "Failed to update substack name");
+            return false;
+        }
     }
 
     public boolean updateCard(int id, int substackId, String question, String answer, String imagePath) {
@@ -250,21 +262,37 @@ public class DbHelper extends SQLiteOpenHelper {
         String selection = CardEntry._ID +"=?";
         String[] selectionArgs = { String.valueOf(id) };
         int count = db.update(CardEntry.TABLE_NAME, cv, selection, selectionArgs);
-        if (count <= 0 ) { return false; } else { return true; }
+        if (count == 1 ) {
+            Log.d(TAG, "Updated card: " + id + ", " + substackId + ", " + question + ", " + answer + ", " + imagePath);
+            return true;
+        } else {
+            Log.d(TAG, "Failed to update card");
+            return false;
+        }
     }
 
-    public void deleteStack(int id) {
+    public boolean deleteStack(int id) {
         //manual query method
         Cursor cursor = loadSubstackTable(id);
         while(cursor.moveToNext()) {
-            deleteSubstack(cursor.getInt(cursor.getColumnIndex(SubstackEntry._ID)));
+            if (!deleteSubstack(cursor.getInt(cursor.getColumnIndex(SubstackEntry._ID)))) {
+                cursor.close();
+                Log.d(TAG, "Failed to delete substack, cancelling remainder of stack delete");
+                return false;
+            }
         }
         cursor.close();
 
-        db.delete(StackEntry.TABLE_NAME, StackEntry._ID + "=" + id, null);
+        if (db.delete(StackEntry.TABLE_NAME, StackEntry._ID + "=" + id, null) == 1) {
+            Log.d(TAG, "Deleted stack ID: " + id);
+            return true;
+        } else {
+            Log.d(TAG, "Failed to delete stack ID: " + id);
+            return false;
+        }
     }
 
-    public void deleteSubstack(int id) {
+    public boolean deleteSubstack(int id) {
         //db.delete(CardEntry.TABLE_NAME, CardEntry.COLUMN_SUBSTACK + "=" + id, null);
         //Cursor cursor = loadCardsTable(new String[]{Integer.toString(id)});
         Cursor cursor = db.rawQuery("SELECT "+CardEntry._ID+" FROM "+CardEntry.TABLE_NAME+" WHERE "+CardEntry.COLUMN_SUBSTACK+"=?", new String[]{id+""});
@@ -275,10 +303,16 @@ public class DbHelper extends SQLiteOpenHelper {
             if (!successfulCardDelete) {
                 //failed to delete a card (failed to delete image file)
                 Log.d(TAG, "Failed to delete card ID: " + cardId + ". Cancelling remainder of delete substack ID: " + id);
-                return;
+                return false;
             }
         }
-        db.delete(SubstackEntry.TABLE_NAME, SubstackEntry._ID + "=" + id, null);
+        if (db.delete(SubstackEntry.TABLE_NAME, SubstackEntry._ID + "=" + id, null) == 1) {
+            Log.d(TAG, "Deleted substack ID: " + id);
+            return true;
+        } else {
+            Log.d(TAG, "Failed to delete substack ID: " + id);
+            return false;
+        }
     }
 
     public boolean deleteCard(int id) {

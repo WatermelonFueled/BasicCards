@@ -77,7 +77,7 @@ public class TestActivity extends AppCompatActivity {
         }
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle("Test");
+        toolbar.setTitle(R.string.test_activity_title);
         setSupportActionBar(toolbar);
 
         setView();
@@ -208,10 +208,6 @@ public class TestActivity extends AppCompatActivity {
         public int getCount() {
             return cardData[0].length + 1;
         }
-    }
-
-    public float getScore() {
-        return 100*correctCount/cardData[0].length;
     }
 
     @Override

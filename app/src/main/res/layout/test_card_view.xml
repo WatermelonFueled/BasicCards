@@ -6,13 +6,15 @@
     android:rowCount="3"
     android:background="@color/backgroundGrey"
     >
-    <include layout="@layout/card_flipper"
-        android:id="@+id/card"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="@dimen/card_list_item_height"
         android:layout_margin="@dimen/test_item_margin"
         android:layout_columnSpan="2"
-        android:layout_rowSpan="1" />
+        android:layout_rowSpan="1">
+        <include layout="@layout/card_flipper"
+            android:id="@+id/card" />
+    </FrameLayout>
     <Button
         android:id="@+id/answer_1"
         android:layout_width="0dp"
