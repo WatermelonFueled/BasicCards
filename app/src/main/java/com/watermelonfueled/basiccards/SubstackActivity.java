@@ -48,15 +48,14 @@ public class SubstackActivity extends AppCompatActivity
         if (savedInstanceState != null) {
             stackId = savedInstanceState.getInt(STACK_ID_KEY);
             substackSelectedList = (ArrayList<Boolean>) savedInstanceState.getSerializable("substackSelectedList");
-            numSelectedSubstacks = savedInstanceState.getInt("numSelectedSubstacks");
             stackName = savedInstanceState.getString("stackName");
         } else {
             Intent intent = getIntent();
             stackId = intent.getIntExtra(StackEntry._ID, 0);
-            numSelectedSubstacks = 0;
             stackName = intent.getStringExtra(StackEntry.COLUMN_NAME);
         }
 
+        numSelectedSubstacks = 0;
         loadSubstackList();
         setView();
     }
@@ -65,7 +64,6 @@ public class SubstackActivity extends AppCompatActivity
     public void onSaveInstanceState(Bundle outState){
         outState.putInt(STACK_ID_KEY, stackId);
         outState.putSerializable("substackSelectedList", substackSelectedList);
-        outState.putInt("numSelectedSubstacks", numSelectedSubstacks);
         outState.putString("stackName", stackName);
         super.onSaveInstanceState(outState);
     }
@@ -89,6 +87,8 @@ public class SubstackActivity extends AppCompatActivity
                 startTestOnClick();
             }
         });
+
+        updateTestAndListButtonVisibility(false);
 
         RecyclerView rv = (RecyclerView) findViewById(R.id.rv_list);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
@@ -115,7 +115,6 @@ public class SubstackActivity extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.substackmenu, menu);
-        updateTestAndListButtonVisibility(false);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -234,15 +233,16 @@ public class SubstackActivity extends AppCompatActivity
         if (checked) { numSelectedSubstacks--; } else { numSelectedSubstacks++; }
         updateTestAndListButtonVisibility(!checked);
         substackSelectedList.set(clickedItemIndex, !checked);
-        Log.i("SUBSTACKACTIVITY", "set index: " + clickedItemIndex + " to: " + substackSelectedList.get(clickedItemIndex));
+        Log.v("SUBSTACKACTIVITY", "set index: " + clickedItemIndex + " to: " + substackSelectedList.get(clickedItemIndex));
 
     }
 
     private void updateTestAndListButtonVisibility(boolean increased) {
+        Log.v(TAG, "Test and List button Visibility | boolean increased: " + increased + ", selected count: " + numSelectedSubstacks);
         if (increased && numSelectedSubstacks >= 1) {
             testFloatingButton.show();
             listFloatingButton.show();
-        } else if (!increased && numSelectedSubstacks == 0) {
+        } else if (numSelectedSubstacks == 0) {
             testFloatingButton.hide();
             listFloatingButton.hide();
         }

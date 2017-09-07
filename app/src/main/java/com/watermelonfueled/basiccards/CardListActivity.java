@@ -138,7 +138,7 @@ public class CardListActivity extends AppCompatActivity
             cardBackList.add(cursor.getString(cursor.getColumnIndex(CardEntry.COLUMN_ANSWER)));
             cardIdList.add(cursor.getInt(cursor.getColumnIndex(CardEntry._ID)));
             cardSubstackIdList.add(cursor.getInt(cursor.getColumnIndex(CardEntry.COLUMN_SUBSTACK)));
-            cardImageList.setValueAt(cursor.getPosition(),cursor.getString(cursor.getColumnIndex(CardEntry.COLUMN_IMAGE)));
+            cardImageList.append(cursor.getPosition(),cursor.getString(cursor.getColumnIndex(CardEntry.COLUMN_IMAGE)));
         }
         cursor.close();
     }
@@ -242,7 +242,7 @@ public class CardListActivity extends AppCompatActivity
                     //card is part of selected substacks
                     cardFrontList.set(toDeleteOrEditIndex, front);
                     cardBackList.set(toDeleteOrEditIndex, back);
-                    cardImageList.setValueAt(toDeleteOrEditIndex, path);
+                    cardImageList.put(toDeleteOrEditIndex, path);
                     cardSubstackIdList.set(toDeleteOrEditIndex,allSubstackIds.get(addOrEditCardToSubstackIndex));
                     adapter.notifyItemChanged(toDeleteOrEditIndex);
                 } else {

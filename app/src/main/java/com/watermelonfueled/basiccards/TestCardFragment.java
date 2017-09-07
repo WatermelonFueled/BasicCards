@@ -127,7 +127,7 @@ public class TestCardFragment extends Fragment implements View.OnClickListener{
             selectedAnswer.setBackgroundColor(getResources().getColor(R.color.colorAccent));
             answerClickListener.onAnswerClick(true, substackId);
         } else {
-            selectedAnswer.setBackgroundColor(getResources().getColor(R.color.backgroundGrey));
+            selectedAnswer.setBackgroundColor(getResources().getColor(R.color.background_dark));
             answerClickListener.onAnswerClick(false, substackId);
         }
     }
