@@ -74,7 +74,13 @@ public class TestResultsFragment extends Fragment implements View.OnClickListene
         percentView.setText(Math.round(rawPercent)+"%");
 
         ResultsPieChartView pieChart = (ResultsPieChartView) getView().findViewById(R.id.pie);
+
+        //for lower api (ie 21) that displayed width as 0dp
+        pieChart.getLayoutParams().width = pieChart.getHeight();
+        pieChart.invalidate();
+
         pieChart.setCorrectPercent(rawPercent);
+
 
         TextView fractionView = (TextView) getView().findViewById(R.id.fraction_score);
         fractionView.setText(correct + "/" + total);
