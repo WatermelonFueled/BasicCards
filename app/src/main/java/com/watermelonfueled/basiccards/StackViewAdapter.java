@@ -1,12 +1,12 @@
 package com.watermelonfueled.basiccards;
 
 import android.content.Context;
+import android.support.v7.widget.AppCompatCheckedTextView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
-import android.widget.CheckedTextView;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -50,7 +50,7 @@ public class StackViewAdapter extends RecyclerView.Adapter<StackViewAdapter.Stac
     public void onBindViewHolder(StackViewHolder holder, int position) {
         holder.stackTextView.setText(stackNameList.get(position));
         if (isSubstackActivity()) {
-            ((CheckedTextView)holder.stackTextView).setChecked(substackSelectedList.get(position));
+            ((AppCompatCheckedTextView)holder.stackTextView).setChecked(substackSelectedList.get(position));
         }
     }
 
@@ -87,7 +87,7 @@ public class StackViewAdapter extends RecyclerView.Adapter<StackViewAdapter.Stac
             int clickedPosition = getAdapterPosition();
             onClickListener.onListItemClick(clickedPosition);
             if (isSubstackActivity()) {
-                ((CheckedTextView)stackTextView).toggle();
+                ((AppCompatCheckedTextView)stackTextView).toggle();
             }
         }
 

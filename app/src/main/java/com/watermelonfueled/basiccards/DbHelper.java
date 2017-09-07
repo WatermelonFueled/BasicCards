@@ -48,6 +48,7 @@ public class DbHelper extends SQLiteOpenHelper {
 
     private DbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        con = context;
     }
 
     @Override
@@ -80,6 +81,10 @@ public class DbHelper extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL(SQL_CREATE_CARDS_TABLE_STACK);
         sqLiteDatabase.execSQL(SQL_CREATE_CARDS_TABLE_SUBSTACK);
         sqLiteDatabase.execSQL(SQL_CREATE_CARDS_TABLE_CARD);
+
+        db = sqLiteDatabase;
+
+        createTutorialStack();
     }
 
     @Override
@@ -90,10 +95,22 @@ public class DbHelper extends SQLiteOpenHelper {
 //            case 2:
 //
 //        }
-//        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + CardEntry.TABLE_NAME);
-//        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + SubstackEntry.TABLE_NAME);
-//        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + StackEntry.TABLE_NAME);
-//        onCreate(sqLiteDatabase);
+    }
+
+    private void createTutorialStack() {
+        long stackId = addStack("Click this Subject, or hold to edit");
+        long substackId1 = addSubstack("Categories:", (int)stackId);
+        long substackId2 = addSubstack("select 1 or more", (int)stackId);
+        long substackId3 = addSubstack("to list/test ", (int)stackId);
+        addCard("This is the front side of the card in category 1. Click to flip in List mode.",
+                "Add more items by pressing the plus icon at the top right on the app bar.",
+                (int)substackId1, null);
+        addCard("This is the front side of the card in category 2. Click to flip in List mode.",
+                "Add more items by pressing the plus icon at the top right on the app bar.",
+                (int)substackId2, null);
+        addCard("This is the front side of the card in category 3. Click to flip in List mode.",
+                "Add more items by pressing the plus icon at the top right on the app bar.",
+                (int)substackId3, null);
     }
 
     //CREATE
@@ -109,22 +126,6 @@ public class DbHelper extends SQLiteOpenHelper {
         cv.put(SubstackEntry.COLUMN_STACK, stackId);
         return db.insert(SubstackEntry.TABLE_NAME, null, cv);
     }
-
-//    public void addCard(String question, String answer, int substackId, Uri imageUri) {
-//        ContentValues cv = new ContentValues();
-//        cv.put(CardEntry.COLUMN_QUESTION, question);
-//        cv.put(CardEntry.COLUMN_ANSWER, answer);
-//        cv.put(CardEntry.COLUMN_SUBSTACK, substackId);
-//        try {
-//            String imagePath = storeImage(imageUri);
-//            cv.put(CardEntry.COLUMN_IMAGE, imagePath);
-//        } catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        db.insert(CardEntry.TABLE_NAME, null, cv);
-//    }
 
     public long addCard(String question, String answer, int substackId, String imagePath) {
         ContentValues cv = new ContentValues();
@@ -271,6 +272,7 @@ public class DbHelper extends SQLiteOpenHelper {
         }
     }
 
+    //DELETE
     public boolean deleteStack(int id) {
         //manual query method
         Cursor cursor = loadSubstackTable(id);

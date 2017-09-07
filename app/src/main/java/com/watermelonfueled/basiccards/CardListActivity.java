@@ -325,14 +325,6 @@ public class CardListActivity extends AppCompatActivity
         editOldImageExistsNotPreserved = false;
     }
 
-    private void clearAddOrEdit() {
-        toDeleteOrEditIndex = 0;
-        addOrEditCardToSubstackIndex = 0;
-        addCardDialog.dismiss();
-        addCardDialog = null;
-        addCardDialogBundle = null;
-    }
-
     public void deleteButtonOnClick(View button) {
         toDeleteOrEditIndex = (int) button.getTag();
         DeleteDialog dialog = new DeleteDialog();
@@ -346,6 +338,14 @@ public class CardListActivity extends AppCompatActivity
         if (dbHelper.deleteCard(cardIdList.get(toDeleteOrEditIndex))) {
             removeCardFromListAndAdapter(toDeleteOrEditIndex);
         }
+    }
+
+    private void clearAddOrEdit() {
+        toDeleteOrEditIndex = 0;
+        addOrEditCardToSubstackIndex = 0;
+        addCardDialog.dismiss();
+        addCardDialog = null;
+        addCardDialogBundle = null;
     }
 
     private void removeCardFromListAndAdapter(int index) {

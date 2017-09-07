@@ -2,9 +2,10 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="@dimen/stack_list_item_height"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_marginTop="@dimen/stack_list_item_padding"
     android:background="@color/backgroundWhite">
-    <CheckedTextView
+    <android.support.v7.widget.AppCompatCheckedTextView
         android:id="@+id/checkedTextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -18,6 +19,7 @@
         android:textColor="@color/font_dark"
         android:includeFontPadding="false"
         android:maxLines="1"
+        app:autoSizeTextType="uniform"
         android:checked="false" />
     <include layout="@layout/edit_delete_buttons"/>
 </RelativeLayout>

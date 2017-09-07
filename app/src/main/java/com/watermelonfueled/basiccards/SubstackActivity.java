@@ -34,7 +34,6 @@ public class SubstackActivity extends AppCompatActivity
     private ArrayList<Integer> substackIdList;
     private ArrayList<Boolean> substackSelectedList;
     private String toDeleteOrEditName, stackName;
-    private Menu menu;
     private FloatingActionButton listFloatingButton, testFloatingButton;
     Type dialogType;
 
@@ -73,7 +72,7 @@ public class SubstackActivity extends AppCompatActivity
 
     private void setView() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle(stackName);
+        toolbar.setTitle("Categories | " + stackName);
         setSupportActionBar(toolbar);
 
         listFloatingButton = (FloatingActionButton) findViewById(R.id.list_floating_button);

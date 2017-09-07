@@ -2,18 +2,21 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="@dimen/stack_list_item_height"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_marginTop="@dimen/stack_list_item_padding"
     android:background="@color/backgroundWhite">
     <TextView
         android:id="@+id/stack_textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:gravity="center_vertical"
         android:padding="@dimen/stack_list_item_text_padding"
         android:textSize="@dimen/stack_list_item_text_size"
         android:textColor="@color/font_dark"
         android:includeFontPadding="false"
         android:maxLines="1"
         android:layout_alignParentLeft="true"
-        android:layout_centerVertical="true"/>
+        android:layout_centerVertical="true"
+        app:autoSizeTextType="uniform"/>
     <include layout="@layout/edit_delete_buttons"/>
 </RelativeLayout>
