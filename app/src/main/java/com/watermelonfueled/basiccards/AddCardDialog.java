@@ -148,7 +148,13 @@ public class AddCardDialog extends DialogFragment implements AdapterView.OnItemS
         addImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                pickGalleryImage();
+                //check storage permission
+                int permissionCheckStorage = ContextCompat.checkSelfPermission(getContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE);
+                if (permissionCheckStorage != PackageManager.PERMISSION_GRANTED){
+                    ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_STORAGE_PERMISSION);
+                } else {
+                    pickGalleryImage();
+                }
             }
         });
 
@@ -158,9 +164,9 @@ public class AddCardDialog extends DialogFragment implements AdapterView.OnItemS
             public void onClick(View v) {
                 //check camera feature
                 if (getContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
-                    int permissionCheck = ContextCompat.checkSelfPermission(getContext(), Manifest.permission.CAMERA);
+                    int permissionCheckCamera = ContextCompat.checkSelfPermission(getContext(), Manifest.permission.CAMERA);
                     //check camera permission
-                    if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+                    if (permissionCheckCamera != PackageManager.PERMISSION_GRANTED) {
                         ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION);
                     } else {
                         takePhoto();
@@ -254,7 +260,7 @@ public class AddCardDialog extends DialogFragment implements AdapterView.OnItemS
         return builder.create();
     }
 
-    public static final int PICK_IMAGE = 1, TAKE_PHOTO = 2, REQUEST_CAMERA_PERMISSION = 3;
+    public static final int PICK_IMAGE = 1, TAKE_PHOTO = 2, REQUEST_CAMERA_PERMISSION = 3, REQUEST_STORAGE_PERMISSION = 4;
 
     public void checkAndDeleteCapturedPhoto() {
         if (oldPath != null && !oldPath.equals("")) {
@@ -314,6 +320,11 @@ public class AddCardDialog extends DialogFragment implements AdapterView.OnItemS
             case REQUEST_CAMERA_PERMISSION:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
                     takePhoto();
+                }
+                break;
+            case REQUEST_STORAGE_PERMISSION:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    pickGalleryImage();
                 }
         }
     }
